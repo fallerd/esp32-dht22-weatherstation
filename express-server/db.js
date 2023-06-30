@@ -9,6 +9,10 @@ const sensors = database.collection('sensors');
 let initialized = false;
 const knownSensors = []
 
+function isConnected() {
+    return !!client && !!client.topology && client.topology.isConnected()
+}
+
 export async function initializeDB() {
     console.log('initializing DB')
     const result = await sensors.find();
@@ -43,7 +47,7 @@ async function appendNewSensor({ sensor, temp, humidity, date }) {
 }
 
 export async function update(data) {
-    if (initialized) {
+    if (initialized && isConnected()) {
         const { sensor, temp, humidity, date } = data
         try {
             const filter = { sensor };
@@ -66,18 +70,22 @@ export async function update(data) {
             }
         } finally {
         }
+    } else {
+        console.error('not connected!')
     }
 }
 
 export async function getData() {
+    console.log('getdata api called')
     const data = [];
 
-    if (initialized) {
+    if (initialized && isConnected()) {
         const result = await sensors.find();
         for await (const doc of result) {
-            console.log('found sensor', doc.sensor)
             data.push(doc); 
         }
+    } else {
+        console.error('not connected!')
     }
     return data;
 }

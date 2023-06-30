@@ -1,5 +1,6 @@
 import React from "react";
 import { Sensors } from "./Sensors";
+import "./Current.scss"
 
 function Current({ dataString }) {
     const originalData = JSON.parse(dataString);
@@ -16,7 +17,7 @@ function Current({ dataString }) {
     const CurrentTemps = () => {
         return currents.map((data) => 
             <div className="sensorCurrent">
-                <span>Sensor: {data.sensor}</span>
+                <span>{data.sensor}</span>
                 <span>Temp: {data.temp}</span>
                 <span>Humidity: {data.humidity}</span>
             </div>
@@ -26,7 +27,9 @@ function Current({ dataString }) {
     return (
         <div className="currentContainer">
             <span>Current:</span>
-            <CurrentTemps/>
+            <div className="currentRow">
+                <CurrentTemps/>
+            </div>
         </div>
     );
 }
