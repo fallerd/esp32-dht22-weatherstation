@@ -1,6 +1,7 @@
 import { update, initializeDB } from './db.js'
 import express from 'express';
 import bodyParser from 'body-parser';
+import path from 'path';
 
 initializeDB();
 
@@ -9,14 +10,21 @@ const app = express();
 
 // parse application/json
 app.use(bodyParser.json());
+app.use(express.static('../react-client/build'));
 
-app.get("/", function (req, res) {
-  console.log('request recieved', req.body);
-  res.send("Hello World!");
+app.get('/data/', (req, res) => {
+  console.log('request received', req.body);
+  res.json({ message: "Hello from Express!" });
 });
 
+// // let the react app to handle any unknown routes 
+// // serve up the index.html if express doesn't recognize the route
+// app.get('*', (req, res) => {
+//   res.sendFile(path.resolve(__dirname, 'react-client', 'build', 'index.html')); // FAILING DUE TO PATHS
+// });
+
 app.post("/addData/", function (req, res) {
-//   console.log('request received', req.body);
+  // console.log('request received', req.body);
   const tempC = req.body.temp;
   const tempF = ((tempC * 9/5) + 32).toFixed(1);
   console.log(`Sensor ${req.body.sensor}:  ${tempF}°F`);
