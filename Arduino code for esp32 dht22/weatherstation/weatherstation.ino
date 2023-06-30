@@ -11,8 +11,7 @@ HTTPClient httpClient;
 int counter = 0;  
 static bool hasWifi = false;
 
-static void InitWifi()
-{
+static void InitWifi() {
   Serial.println("Connecting Wifi...");
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -25,21 +24,19 @@ static void InitWifi()
   Serial.println(WiFi.localIP());
 }
 
-void setup()
-{
+void setup() {
   Serial.begin(115200);
   dht.setup(27, DHTesp::DHT22);
   Serial.println("ESP32 Device");
 
   hasWifi = false;
   InitWifi();
-  if (!hasWifi)
-  {
+  if (!hasWifi) {
     return;
   }
 }
 
-void loop(){
+void loop() {
   if (WiFi.status() == WL_CONNECTED) {
     counter = 0;
     Serial.println("Wifi is still connected with IP: "); 
@@ -52,7 +49,7 @@ void loop(){
     Serial.print(".");
     counter++;
     if (counter>=60){ // 30 seconds timeout - reset board
-    ESP.restart();
+      ESP.restart();
     }
   }
 
@@ -81,7 +78,7 @@ void loop(){
   Serial.println(httpCode);
    
   if (httpCode > 200) { 
-      Serial.println("Error on HTTP request");
+    Serial.println("Error on HTTP request");
   }
 
   httpClient.end();
