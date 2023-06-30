@@ -1,4 +1,4 @@
-import { update, initializeDB } from './db.js'
+import { update, initializeDB, getData } from './db.js'
 import express from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
@@ -14,7 +14,11 @@ app.use(express.static('../react-client/build'));
 
 app.get('/data/', (req, res) => {
   console.log('request received', req.body);
-  res.json({ message: "Hello from Express!" });
+
+  getData().then(data => {
+    console.log('Data loaded:', data.length > 0)
+    res.json({ message: "Hello from Express!", data });
+  })
 });
 
 // // let the react app to handle any unknown routes 

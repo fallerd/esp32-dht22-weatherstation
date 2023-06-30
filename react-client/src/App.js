@@ -1,6 +1,6 @@
-import logo from './logo.svg';
 import './App.css';
 import React from "react";
+import Chart from './Chart';
 
 function App() {
   const [data, setData] = React.useState(null);
@@ -8,38 +8,17 @@ function App() {
   React.useEffect(() => {
     fetch("/data")
       .then((res) => res.json())
-      .then((data) => setData(data.message));
+      .then((data) => setData(JSON.stringify(data.data)));
   }, []);
 
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>{!data ? "Loading..." : data}</p>
-      </header>
+      {!data ?
+        <p>"Loading..."</p> :
+        <Chart className="chart" dataString={data}/>
+      }
     </div>
   );
 }
-
-// function App() {
-//   return (
-//     <div className="App">
-//       <header className="App-header">
-//         <img src={logo} className="App-logo" alt="logo" />
-//         <p>
-//           Edit <code>src/App.js</code> and save to reload.
-//         </p>
-//         <a
-//           className="App-link"
-//           href="https://reactjs.org"
-//           target="_blank"
-//           rel="noopener noreferrer"
-//         >
-//           Learn React
-//         </a>
-//       </header>
-//     </div>
-//   );
-// }
 
 export default App;

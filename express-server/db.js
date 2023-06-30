@@ -68,3 +68,16 @@ export async function update(data) {
         }
     }
 }
+
+export async function getData() {
+    const data = [];
+
+    if (initialized) {
+        const result = await sensors.find();
+        for await (const doc of result) {
+            console.log('found sensor', doc.sensor)
+            data.push(doc); 
+        }
+    }
+    return data;
+}
