@@ -1,6 +1,7 @@
-import './App.css';
+import './App.scss';
 import React from "react";
 import Chart from './Chart';
+import Current from './Current';
 
 function App() {
   const [data, setData] = React.useState(null);
@@ -15,7 +16,13 @@ function App() {
     <div className="App">
       {!data ?
         <p>"Loading..."</p> :
-        <Chart className="chart" dataString={data}/>
+        <div className='graphColumn'>
+          <Current dataString={data}/>
+          <span className='title'>Temperature</span>
+          <Chart dataString={data} type="temp"/>
+          <span className='title'>Humidity</span>
+          <Chart dataString={data} type="humidity"/>
+        </div>
       }
     </div>
   );

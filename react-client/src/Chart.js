@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import './Chart.css';
+import './Chart.scss';
+import { Sensors } from "./Sensors";
 
-function Chart({ dataString }) {
+function Chart({ dataString, type }) {
   const ref = useRef();
 
   useEffect(() => {
@@ -12,7 +13,7 @@ function Chart({ dataString }) {
       for (const data of sensor.data) {
         const {temp, humidity, date} = data
         formattedData.push({
-          sensor: sensor.sensor,
+          sensor: Sensors[sensor.sensor],
           temp,
           humidity,
           date
@@ -36,12 +37,12 @@ function Chart({ dataString }) {
     const x = d3.scaleTime(d3.extent(formattedData, d => d.date), [marginLeft, width - marginRight]);
   
     // Declare the y (vertical position) scale.
-    const y = d3.scaleLinear(d3.extent(formattedData, d => d.temp), [height - marginBottom, marginTop]);
+    const y = d3.scaleLinear(d3.extent(formattedData, d => d[type]), [height - marginBottom, marginTop]);
 
     // Declare the line generator.
     const line = d3.line()
         .x(d => x(d.date))
-        .y(d => y(d.temp));
+        .y(d => y(d[type]));
   
     // Create the SVG container.
     const svg = d3.select(ref.current).append("svg")
@@ -77,7 +78,7 @@ function Chart({ dataString }) {
       // // Add the Legend
       svg.append("text")
           .attr("x", 0)  // space legend
-          .attr("y", 20 + (i * 20))
+          .attr("y", 100 + (i * 20))
           .attr("class", "legend")    // style the legend
           .style("fill", function() { // Add the colours dynamically
               return d.color = color(d.key); })
