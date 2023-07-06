@@ -2,11 +2,9 @@ import React from "react";
 import { Sensors } from "./Sensors";
 import "./Current.scss"
 
-function Current({ dataString }) {
-    const originalData = JSON.parse(dataString);
+function Current({ originalData }) {
     const currents = []
     for (const sensor of originalData) {
-        console.log('butt')
         currents.push({
             sensor: Sensors[sensor.sensor],
             temp: sensor.data[sensor.data.length-1].temp,

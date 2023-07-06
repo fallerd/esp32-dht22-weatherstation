@@ -8,6 +8,9 @@
   },
   "scripts": {
     "start-dev": "node index.js",
-    "start": "pm2 start index.js"
+    "start": "pm2 start index.js",
+    "status":  "pm2 status",
+    "restart": "pm2 restart index",
+    "stop": "pm2 stop index"
   }
 }

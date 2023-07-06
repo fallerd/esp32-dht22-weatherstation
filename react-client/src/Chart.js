@@ -3,11 +3,10 @@ import * as d3 from "d3";
 import './Chart.scss';
 import { Sensors } from "./Sensors";
 
-function Chart({ dataString, type }) {
+function Chart({ originalData, type }) {
   const ref = useRef();
 
   useEffect(() => {
-    const originalData = JSON.parse(dataString)
     const formattedData = [];
     for (const sensor of originalData) {
       for (const data of sensor.data) {
@@ -44,6 +43,9 @@ function Chart({ dataString, type }) {
         .x(d => x(d.date))
         .y(d => y(d[type]));
   
+    // Remove content from last draw
+    d3.select(ref.current).selectAll("*").remove();
+
     // Create the SVG container.
     const svg = d3.select(ref.current).append("svg")
         .attr("width", width)
@@ -84,7 +86,7 @@ function Chart({ dataString, type }) {
               return d.color = color(d.key); })
           .text(d.key); 
     });
-})
+}, [originalData]);
 
   return (
     <div ref={ref}/>
