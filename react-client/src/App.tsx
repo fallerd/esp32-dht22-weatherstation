@@ -38,10 +38,7 @@ function App() {
 
   React.useEffect(() => {
     fetch("/data")
-      .then((res) => {
-        console.log("board sent", res)
-        return res.json()
-      })
+      .then((res) => res.json())
       .then((data) => {
         // TODO: don't do data manipulation based on data pulls, requires re-reading DB every time, not efficient, pull data elsewhere once instead
         switch (dateRange) {

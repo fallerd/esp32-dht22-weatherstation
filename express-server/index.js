@@ -28,7 +28,7 @@ app.get('/data/', (req, res) => {
 // });
 
 app.post("/addData/", function (req, res) {
-  // console.log('request received', req.body);
+  console.log('request received', req.body);
   const tempC = req.body.temp;
   const tempF = ((tempC * 9/5) + 32).toFixed(1);
   console.log(`Sensor ${req.body.sensor}:  ${tempF}°F`);
