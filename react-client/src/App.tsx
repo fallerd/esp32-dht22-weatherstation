@@ -38,7 +38,10 @@ function App() {
 
   React.useEffect(() => {
     fetch("/data")
-      .then((res) => res.json())
+      .then((res) => {
+        console.log("board sent", res)
+        return res.json()
+      })
       .then((data) => {
         // TODO: don't do data manipulation based on data pulls, requires re-reading DB every time, not efficient, pull data elsewhere once instead
         switch (dateRange) {
@@ -80,8 +83,8 @@ function App() {
         <p>Loading...</p> :
         <div className='graphColumn'>
           <Current originalData={data}/>
-          <div>
-            <label>Date Range:</label>
+          <div className='title'>
+            <label>Filter Graph Data:</label>
             <select
               id="dateRangeSelector"
               onChange={updateRange}

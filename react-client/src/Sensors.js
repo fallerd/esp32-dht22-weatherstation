@@ -1,6 +1,8 @@
 // Sensor Name Mapping
 
 export const Sensors = {
-    "-1474514256": "Train Room",
-    "-2127386704": "Office"
+    "2": "Train Room",
+    "1": "Office",
+    "3": "Outside",
+    "4": "Attic"
 }

@@ -56,7 +56,8 @@ void loop() {
   // Reading temperature & humidity
   float temp = dht.getTemperature();
   float humidity = dht.getHumidity();
-  int chipId = ESP.getEfuseMac();
+  // int chipId = ESP.getEfuseMac(); // NOT UNIQUE
+  int chipId = 3;
 
   Serial.println("*** requesting URL");
 
@@ -83,5 +84,5 @@ void loop() {
 
   httpClient.end();
   Serial.println("*** End ");
-  delay(60000); // send once per minute
+  delay(600000); // send once per 10 minutes
 }

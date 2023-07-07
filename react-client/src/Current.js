@@ -8,16 +8,17 @@ function Current({ originalData }) {
         currents.push({
             sensor: Sensors[sensor.sensor],
             temp: sensor.data[sensor.data.length-1].temp,
-            humidity: sensor.data[sensor.data.length-1].humidity
+            humidity: sensor.data[sensor.data.length-1].humidity,
+            date: sensor.data[sensor.data.length-1].date
         })
     }
 
     const CurrentTemps = () => {
-        return currents.map((data) => 
-            <div className="sensorCurrent">
+        return currents.map((data) => <div className="sensorCurrent">
                 <span>{data.sensor}</span>
                 <span>Temp: {data.temp}</span>
                 <span>Humidity: {data.humidity}</span>
+                <span>Last Update: {new Date(data.date).toLocaleString()}</span>
             </div>
         )
     }
