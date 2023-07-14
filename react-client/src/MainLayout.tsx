@@ -74,9 +74,9 @@ function MainLayout({ rawData } : { rawData: Sensor[] }) {
             >
               <option value={DateRanges.days1}>1 day</option>
               <option value={DateRanges.days3}>3 days</option>
-              <option value={DateRanges.days7}>7 days</option>
+              <option value={DateRanges.days7} selected>7 days</option>
               <option value={DateRanges.days30}>30 days</option>
-              <option value={DateRanges.daysAll} selected>All</option>
+              <option value={DateRanges.daysAll}>All</option>
             </select>
           </div>
           <span className='title'>Temperature</span>
