@@ -7,13 +7,4 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
-
-  .graphColumn {
-    display: flex;
-    flex-direction: column;
-  
-    .title {
-      margin-top: 50px;
-    }
-  }
 }

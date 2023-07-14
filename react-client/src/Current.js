@@ -1,5 +1,6 @@
 import React from "react";
 import { Sensors } from "./Sensors";
+import Sensor from "./Sensor";
 import "./Current.scss"
 
 function Current({ originalData }) {
@@ -13,20 +14,7 @@ function Current({ originalData }) {
         })
     }
 
-    const CurrentTemps = () => {
-        return currents.map((data) => {
-            const d = new Date(data.date)
-            const datestring = d.getHours() + ":" + d.getMinutes() + ' ' + (d.getMonth()+1) + "/" + d.getDate();
-
-            return <div className="sensorCurrent" key={data.sensor}>
-                <span className="location">{data.sensor}</span>
-                <span>{data.temp}°F</span>
-                <span>{data.humidity}%</span>
-                <span className="lastUpdate">{datestring}</span>
-            </div>
-            }
-        )
-    }
+    const CurrentTemps = () => currents.map((data) => <Sensor data={data}/>)
 
     return (
         <div className="currentContainer">
