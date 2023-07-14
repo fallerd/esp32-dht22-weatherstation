@@ -14,12 +14,17 @@ function Current({ originalData }) {
     }
 
     const CurrentTemps = () => {
-        return currents.map((data) => <div className="sensorCurrent">
-                <span>{data.sensor}</span>
-                <span>Temp: {data.temp}</span>
-                <span>Humidity: {data.humidity}</span>
-                <span>Last Update: {new Date(data.date).toLocaleString()}</span>
+        return currents.map((data) => {
+            const d = new Date(data.date)
+            const datestring = d.getHours() + ":" + d.getMinutes() + ' ' + (d.getMonth()+1) + "/" + d.getDate();
+
+            return <div className="sensorCurrent" key={data.sensor}>
+                <span className="location">{data.sensor}</span>
+                <span>{data.temp}°F</span>
+                <span>{data.humidity}%</span>
+                <span className="lastUpdate">{datestring}</span>
             </div>
+            }
         )
     }
 
