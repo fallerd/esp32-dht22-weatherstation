@@ -2,25 +2,32 @@
 #include <HTTPClient.h>
 #include "DHTesp.h"
 #include "secret.h"
-DHTesp dht;
 
 const char* ssid = SSID;
 const char* password = PASSWORD;
 
+DHTesp dht;
 HTTPClient httpClient;
-int counter = 0;  
-static bool hasWifi = false;
+int timeout = 0;  
 
 static void InitWifi() {
-  Serial.println("Connecting Wifi...");
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("Wifi still connected with IP: "); 
+  } else {
+    Serial.println("Connecting Wifi...");
+    timeout = 0;
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(1000);
+      Serial.print(".");
+      timeout++;
+      if (timeout >= 60){ 
+        Serial.println("Connection timed out, resetting board"); 
+        ESP.restart();
+      }
+    }
+    Serial.println("Wifi connected with IP: "); 
   }
-  hasWifi = true;
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 }
 
@@ -28,35 +35,15 @@ void setup() {
   Serial.begin(115200);
   dht.setup(27, DHTesp::DHT22);
   Serial.println("ESP32 Device");
-
-  hasWifi = false;
-  InitWifi();
-  if (!hasWifi) {
-    return;
-  }
 }
 
 void loop() {
-  if (WiFi.status() == WL_CONNECTED) {
-    counter = 0;
-    Serial.println("Wifi is still connected with IP: "); 
-    Serial.println(WiFi.localIP());
-  } else if (WiFi.status() != WL_CONNECTED) { // if we lost connection, retry
-    WiFi.begin(ssid);      
-  }
-  while (WiFi.status() != WL_CONNECTED) { // during lost connection, print dots
-    delay(500);
-    Serial.print(".");
-    counter++;
-    if (counter>=60){ // 30 seconds timeout - reset board
-      ESP.restart();
-    }
-  }
+  InitWifi();
 
   // Reading temperature & humidity
   float temp = dht.getTemperature();
   float humidity = dht.getHumidity();
-  // int chipId = ESP.getEfuseMac(); // NOT UNIQUE
+  // int chipId = ESP.getEfuseMac(); // NOT UNIQUE, must manually spec unique ids
   int chipId = 3;
 
   Serial.println("*** requesting URL");
@@ -73,6 +60,7 @@ void loop() {
   httpRequestData += ",\"humidity\":";
   httpRequestData += humidity;
   httpRequestData += "}";
+  Serial.println(httpRequestData);
 
   //Check for the returning code
   int httpCode = httpClient.POST(httpRequestData);       
