@@ -1,0 +1,23 @@
+.sensorRow {
+    display: flex;
+    gap: 50px;
+}
+
+.selectorRow {
+    display: flex;
+    gap: 20px;
+
+    span {
+        padding: 0px 5px;
+    }
+
+    .selected {
+        border-bottom: 1px solid white;
+        cursor: default;
+        background-color: #3e444e;
+    }
+
+    :not(.selected) {
+        cursor: pointer;
+    }
+}

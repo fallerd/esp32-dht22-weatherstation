@@ -17,12 +17,7 @@ function Current({ originalData }) {
     const CurrentTemps = () => currents.map((data) => <Sensor data={data}/>)
 
     return (
-        <div className="currentContainer">
-            <span>Current:</span>
-            <div className="currentRow">
-                <CurrentTemps/>
-            </div>
-        </div>
+        <CurrentTemps/>
     );
 }
 

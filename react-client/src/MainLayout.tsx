@@ -3,6 +3,7 @@ import Chart from './Chart.js';
 import Current from './Current.js';
 import Peak from './Peak.js';
 import "./MainLayout.scss"
+import CurrentHighLowSelector from "./CurrentHighLowSelector.js";
 
 type Sensor = {
     sensor: number,
@@ -30,10 +31,10 @@ type DataPoint = {
     date: number
 }
   
-function MainLayout({ rawData } : {rawData: Sensor[]}) {
+function MainLayout({ rawData } : { rawData: Sensor[] }) {
     const filteredData: Sensor[] = []; 
     
-    const [dateRange, setDateRange] = React.useState(DateRanges.daysAll);
+    const [dateRange, setDateRange] = React.useState(DateRanges.days7);
 
     const updateRange = (event: any) => {
         setDateRange(event.target.value);
@@ -64,8 +65,7 @@ function MainLayout({ rawData } : {rawData: Sensor[]}) {
 
     return (
         <div className='graphColumn'>
-          <Current originalData={filteredData}/>
-          <Peak originalData={filteredData}/>
+          <CurrentHighLowSelector data={filteredData}/>
           <div className='title'>
             <label>Filter Graph Data:</label>
             <select
