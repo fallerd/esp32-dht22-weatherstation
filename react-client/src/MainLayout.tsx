@@ -1,28 +1,36 @@
-import React from "react";
+import React, { useState } from "react";
 import Chart from './Chart.js';
-import Current from './Current.js';
-import Peak from './Peak.js';
 import "./MainLayout.scss"
-import CurrentHighLowSelector from "./CurrentHighLowSelector.js";
+import Selector from "./Selector.js";
+import SensorsRow from "./SensorsRow.js";
+import { EnabledSensors, SensorNames } from "./SensorNames.js";
+import MultiSelector from "./MultiSelector.js";
 
 type Sensor = {
     sensor: number,
     data: DataPoint[]
 }
 
-enum DateRanges {
-    days1 = "days1",
-    days3 = "days3",
-    days7 = "days7",
-    days30 = "days30",
-    daysAll = "daysAll"
+enum DisplayModes {
+    current = "Current",
+    high = "High",
+    low = "Low",
 }
 
-const DateRangeMap = {
+export enum DateRanges {
+    days1 = "1 Day",
+    days3 = "3 Days",
+    days7 = "7 Days",
+    days30 = "30 Days",
+    daysAll = "All"
+}
+
+export const DateRangeMap = {
     [DateRanges.days1]: 1,
     [DateRanges.days3]: 3,
     [DateRanges.days7]: 7,
     [DateRanges.days30]: 30,
+    [DateRanges.daysAll]: Infinity
 }
 
 type DataPoint = {
@@ -32,57 +40,63 @@ type DataPoint = {
 }
   
 function MainLayout({ rawData } : { rawData: Sensor[] }) {
-    const filteredData: Sensor[] = []; 
-    
-    const [dateRange, setDateRange] = React.useState(DateRanges.days7);
+    const [dateRange, setDateRange] = useState(DateRanges.days7);
+    const [displayMode, setDisplayMode] = useState(DisplayModes.current);
+    const [enabledSensors, setEnabledSensors] = useState<{[key: string]: Boolean}>(EnabledSensors);
 
-    const updateRange = (event: any) => {
-        setDateRange(event.target.value);
+    const toggleSensor = (sensor: string) => {
+        let enabledSensorCount = 0;
+        for (const sensorCheck of Object.keys(enabledSensors)) {
+            if (enabledSensors[sensorCheck]) {
+                enabledSensorCount++
+            }
+        }
+        if (enabledSensorCount === 1 && enabledSensors[sensor]) {
+            // prevent toggling off of final enabled sensor
+            return
+        }
+        const enabledSensorsTemp = JSON.parse(JSON.stringify(enabledSensors))
+        enabledSensorsTemp[sensor] = !enabledSensorsTemp[sensor]
+        setEnabledSensors(enabledSensorsTemp)
     }
 
+    const daysAgo = DateRangeMap[dateRange];
+
+    const filteredData: Sensor[] = []; 
     switch (dateRange) {
     case DateRanges.daysAll: 
         filteredData.push(...rawData)
         break;
     default:
         for (const sensor of rawData) {
-            const sensorFiltered: Sensor = {
-                sensor: sensor.sensor,
-                data: []
+            if (enabledSensors[sensor.sensor]) {
+                const sensorFiltered: Sensor = {
+                    sensor: sensor.sensor,
+                    data: []
+                }
+                const dateOffset = (24*60*60*1000) * daysAgo;
+                const now = new Date();
+                const filterMillis = now.getTime() - dateOffset;
+                for (const data of sensor.data) {
+                    if (data.date > filterMillis) {
+                        sensorFiltered.data.push(data);
+                    } 
+                }
+                filteredData.push(sensorFiltered);
             }
-            const daysAgo = DateRangeMap[dateRange];
-            const dateOffset = (24*60*60*1000) * daysAgo;
-            const now = new Date();
-            const filterMillis = now.getTime() - dateOffset;
-            for (const data of sensor.data) {
-                if (data.date > filterMillis) {
-                sensorFiltered.data.push(data);
-                } 
-            }
-            filteredData.push(sensorFiltered);
         }
     }
 
     return (
         <div className='graphColumn'>
-          <CurrentHighLowSelector data={filteredData}/>
-          <div className='title'>
-            <label>Filter Graph Data:</label>
-            <select
-              id="dateRangeSelector"
-              onChange={updateRange}
-            >
-              <option value={DateRanges.days1}>1 day</option>
-              <option value={DateRanges.days3}>3 days</option>
-              <option value={DateRanges.days7} selected>7 days</option>
-              <option value={DateRanges.days30}>30 days</option>
-              <option value={DateRanges.daysAll}>All</option>
-            </select>
-          </div>
-          <span className='title'>Temperature</span>
-          <Chart originalData={filteredData} type="temp"/>
-          <span className='title'>Humidity</span>
-          <Chart originalData={filteredData} type="humidity"/>
+            <Selector values={DateRanges} currentValue={dateRange} setValue={setDateRange}/>
+            <Selector values={DisplayModes} currentValue={displayMode} setValue={setDisplayMode}/>
+            <SensorsRow originalData={filteredData} displayMode={displayMode} daysAgo={daysAgo}/>
+            <MultiSelector values={SensorNames} currentValue={enabledSensors} toggleValue={toggleSensor}/>
+            <span className='title'>Temperature</span>
+            <Chart originalData={filteredData} type="temp"/>
+            <span className='title'>Humidity</span>
+            <Chart originalData={filteredData} type="humidity"/>
         </div>
     );
 }

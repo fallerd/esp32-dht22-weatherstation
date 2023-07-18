@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 import './Chart.scss';
-import { Sensors } from "./Sensors";
+import { SensorColors, SensorNames } from "./SensorNames";
 
 function Chart({ originalData, type }) {
   const ref = useRef();
@@ -12,7 +12,7 @@ function Chart({ originalData, type }) {
       for (const data of sensor.data) {
         const {temp, humidity, date} = data
         formattedData.push({
-          sensor: Sensors[sensor.sensor],
+          sensor: SensorNames[sensor.sensor],
           temp,
           humidity,
           date
@@ -67,14 +67,13 @@ function Chart({ originalData, type }) {
             .attr("x2", width - marginLeft - marginRight)
             .attr("stroke-opacity", 0.1))
 
-    var color = d3.scaleOrdinal(d3.schemeCategory10);
 
     // add lines
     dataNest.forEach(function(d,i) { 
       svg.append("path")
           .style("fill", "none")
-          .style("stroke", function() { // Add the colours dynamically
-              return d.color = color(d.key); })
+          .style("stroke", function() {
+              return d.color = SensorColors[d.key]; })
           .attr("d", line(d.value));
 
       // // Add the Legend
@@ -82,8 +81,8 @@ function Chart({ originalData, type }) {
           .attr("x", 0)  // space legend
           .attr("y", 100 + (i * 20))
           .attr("class", "legend")    // style the legend
-          .style("fill", function() { // Add the colours dynamically
-              return d.color = color(d.key); })
+          .style("fill", function() {
+              return d.color = SensorColors[d.key]; })
           .text(d.key); 
     });
 }, [originalData]);
