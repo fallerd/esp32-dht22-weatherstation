@@ -7,7 +7,7 @@ export const SensorNames = {
     "4": "Attic"
 }
 
-export const EnabledSensors = {
+export const DefaultEnabledSensors = {
     "1": true,
     "2": true,
     "3": true,

@@ -3,7 +3,7 @@ import Chart from './Chart.js';
 import "./MainLayout.scss"
 import Selector from "./Selector.js";
 import SensorsRow from "./SensorsRow.js";
-import { EnabledSensors, SensorNames } from "./SensorNames.js";
+import { DefaultEnabledSensors, SensorNames } from "./SensorNames.js";
 import MultiSelector from "./MultiSelector.js";
 
 type Sensor = {
@@ -15,6 +15,7 @@ enum DisplayModes {
     current = "Current",
     high = "High",
     low = "Low",
+    avg = "Avg"
 }
 
 export enum DateRanges {
@@ -38,11 +39,40 @@ type DataPoint = {
     humidity: number,
     date: number
 }
+
+type EnabledSensors = {[key: string]: Boolean}
+
+const filterDataByDateRange = (rawData: Sensor[], daysAgo: number, enabledSensors: EnabledSensors) => {
+    const filteredData: Sensor[] = []; 
+    if (daysAgo === Infinity) {
+        filteredData.push(...rawData)
+    } else {
+        for (const sensor of rawData) {
+            if (enabledSensors[sensor.sensor]) {
+                const sensorFiltered: Sensor = {
+                    sensor: sensor.sensor,
+                    data: []
+                }
+                const dateOffset = (24*60*60*1000) * daysAgo;
+                const now = new Date();
+                const filterMillis = now.getTime() - dateOffset;
+                for (const data of sensor.data) {
+                    if (data.date > filterMillis) {
+                        sensorFiltered.data.push(data);
+                    } 
+                }
+                filteredData.push(sensorFiltered);
+            }
+        }
+    } 
+
+    return filteredData;
+}
   
 function MainLayout({ rawData } : { rawData: Sensor[] }) {
     const [dateRange, setDateRange] = useState(DateRanges.days7);
     const [displayMode, setDisplayMode] = useState(DisplayModes.current);
-    const [enabledSensors, setEnabledSensors] = useState<{[key: string]: Boolean}>(EnabledSensors);
+    const [enabledSensors, setEnabledSensors] = useState<EnabledSensors>(DefaultEnabledSensors);
 
     const toggleSensor = (sensor: string) => {
         let enabledSensorCount = 0;
@@ -62,30 +92,7 @@ function MainLayout({ rawData } : { rawData: Sensor[] }) {
 
     const daysAgo = DateRangeMap[dateRange];
 
-    const filteredData: Sensor[] = []; 
-    switch (dateRange) {
-    case DateRanges.daysAll: 
-        filteredData.push(...rawData)
-        break;
-    default:
-        for (const sensor of rawData) {
-            if (enabledSensors[sensor.sensor]) {
-                const sensorFiltered: Sensor = {
-                    sensor: sensor.sensor,
-                    data: []
-                }
-                const dateOffset = (24*60*60*1000) * daysAgo;
-                const now = new Date();
-                const filterMillis = now.getTime() - dateOffset;
-                for (const data of sensor.data) {
-                    if (data.date > filterMillis) {
-                        sensorFiltered.data.push(data);
-                    } 
-                }
-                filteredData.push(sensorFiltered);
-            }
-        }
-    }
+    const filteredData = filterDataByDateRange(rawData, daysAgo, enabledSensors); 
 
     return (
         <div className='graphColumn'>
