@@ -21,7 +21,7 @@ static void InitWifi() {
       delay(1000);
       Serial.print(".");
       timeout++;
-      if (timeout >= 60){ 
+      if (timeout > 60){ 
         Serial.println("Connection timed out, resetting board"); 
         ESP.restart();
       }
@@ -34,19 +34,19 @@ static void InitWifi() {
 void setup() {
   Serial.begin(115200);
   dht.setup(27, DHTesp::DHT22);
-  Serial.println("ESP32 Device");
-}
 
-void loop() {
   InitWifi();
 
   // Reading temperature & humidity
   float temp = dht.getTemperature();
   float humidity = dht.getHumidity();
   // int chipId = ESP.getEfuseMac(); // NOT UNIQUE, must manually spec unique ids
-  int chipId = 3;
+  int chipId = 1;
 
-  Serial.println("*** requesting URL");
+  Serial.print("Sensor id #");
+  Serial.println(chipId);
+
+  Serial.println("Posting data:");
 
   String url = URL;
   url += "addData/";
@@ -66,11 +66,17 @@ void loop() {
   int httpCode = httpClient.POST(httpRequestData);       
   Serial.println(httpCode);
    
-  if (httpCode > 200) { 
+  if (httpCode > 200 || httpCode < 0) { 
     Serial.println("Error on HTTP request");
   }
 
   httpClient.end();
-  Serial.println("*** End ");
-  delay(600000); // send once per 10 minutes
+  Serial.println("Sleeping for 10 mins");
+
+  esp_sleep_enable_timer_wakeup(1000000 * 60 * 10);
+  esp_deep_sleep_start();
+}
+
+void loop() {
+
 }
