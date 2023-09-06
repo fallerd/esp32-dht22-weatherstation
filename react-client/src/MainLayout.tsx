@@ -45,7 +45,11 @@ type EnabledSensors = {[key: string]: Boolean}
 const filterDataByDateRange = (rawData: Sensor[], daysAgo: number, enabledSensors: EnabledSensors) => {
     const filteredData: Sensor[] = []; 
     if (daysAgo === Infinity) {
-        filteredData.push(...rawData)
+        for (const sensor of rawData) {
+            if (enabledSensors[sensor.sensor]) {
+                filteredData.push(sensor);
+            }
+        }
     } else {
         for (const sensor of rawData) {
             if (enabledSensors[sensor.sensor]) {
