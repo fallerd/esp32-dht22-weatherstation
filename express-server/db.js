@@ -23,7 +23,10 @@ export async function update(data) {
                 humidity,
                 date
             }
+            console.log("inserting",doc)
             const result = await dataPoints.insertOne(doc);
+            console.log(result)
+
         } finally {
         }
     } else {
