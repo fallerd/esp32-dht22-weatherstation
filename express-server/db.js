@@ -105,34 +105,28 @@ async function getSensorData(sensor) {
 export async function getData() {
     console.log('getdata api called')
     const start = new Date().getTime()
-    
     const data = [];
 
     if (isConnected()) {
+
+        let [sensor1Data, sensor2Data, sensor3Data, sensor4Data] = await Promise.all([getSensorData('1'), getSensorData('2'), getSensorData('3'), getSensorData('4')]);
+
         data.push(...[{
             sensor: '1',
-            data: await getSensorData('1')
+            data: sensor1Data
         },
         {
             sensor: '2',
-            data: await getSensorData('2')
+            data: sensor2Data
         },
         {
             sensor: '3',
-            data: await getSensorData('3')
+            data: sensor3Data
         },
         {
             sensor: '4',
-            data: await getSensorData('4')
+            data: sensor4Data
         }])
-        console.log(data[0].data[0])
-
-        // /// TODO: pull only necessary data (e.g. either by date range or pull all data but only pull nth data over time)
-        // // and transform it into sensible data structure that the app can read
-        // // or reformat the way the app reads data so transforming it is not necessary
-        // for await (const doc of result) {
-        //     data.push(doc); 
-        // }
     } else {
         console.error('getdata: not connected!')
     }
