@@ -35,7 +35,7 @@ app.post("/addData/", function (req, res) {
     sensor: req.body.sensor,
     temp: parseFloat(tempF),
     humidity: req.body.humidity,
-    date: { $date: new Date() } 
+    date: new Date()
   })
 
   res.send("success");
