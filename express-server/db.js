@@ -77,6 +77,8 @@ export async function update(data) {
 
 export async function getData() {
     console.log('getdata api called')
+    const start = new Date().getTime()
+    
     const data = [];
 
     if (initialized && isConnected()) {
@@ -87,5 +89,6 @@ export async function getData() {
     } else {
         console.error('not connected!')
     }
+    console.log('getdata time', new Date().getTime() - start);
     return data;
 }
