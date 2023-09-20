@@ -1,9 +1,7 @@
-import { update, initializeDB, getData } from './db.js'
+import { update, getData } from './db.js'
 import express from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
-
-initializeDB();
 
 const port = 3000;
 const app = express();
@@ -37,7 +35,7 @@ app.post("/addData/", function (req, res) {
     sensor: req.body.sensor,
     temp: parseFloat(tempF),
     humidity: req.body.humidity,
-    date: Date.now() 
+    date: { $date: new Date() } 
   })
 
   res.send("success");
