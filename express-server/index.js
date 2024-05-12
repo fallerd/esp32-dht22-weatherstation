@@ -1,4 +1,4 @@
-import { update, getData } from './db.js'
+import { update, updateDistance, getData } from './db.js'
 import express from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
@@ -36,6 +36,19 @@ app.post("/addData/", function (req, res) {
     temp: parseFloat(tempF),
     humidity: req.body.humidity,
     date: new Date()
+  })
+
+  res.send("success");
+});
+
+app.post("/postDistance/", function (req, res) {
+  console.log('request received', req.body);
+  const distance = req.body.distance;
+  console.log(`Distance ${distance}"`);
+
+  updateDistance({
+    date: new Date(),
+    distance
   })
 
   res.send("success");

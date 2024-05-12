@@ -7,6 +7,8 @@ client.connect()
 const database = client.db('weather');
 const sensors = database.collection('sensors');
 const dataPoints = database.collection('data');
+const databaseDistance = client.db('distance');
+const distanceCollection = databaseDistance.collection('distance');
 console.log(isConnected())
 
 function isConnected() {
@@ -26,6 +28,27 @@ export async function update(data) {
             console.log("inserting",doc)
             const result = await dataPoints.insertOne(doc);
             console.log(result)
+
+        } finally {
+        }
+    } else {
+        console.error('not connected!')
+    }
+}
+
+export async function updateDistance(data) {
+    if (isConnected()) {
+        const { distance, date } = data
+        try {
+            const doc = {
+                distance,
+                date
+            }
+            console.log("inserting",doc)
+            const result = await dataPoints.insertOne(doc);
+            console.log(result)
+
+            //updateone 664116e78fb5b2099b4ab2eb
 
         } finally {
         }
