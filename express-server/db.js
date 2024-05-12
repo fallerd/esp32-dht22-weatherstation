@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import 'dotenv/config';
 
 const mongoInfo = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.f1z2lxc.mongodb.net/?retryWrites=true&w=majority`;
@@ -44,11 +44,10 @@ export async function updateDistance(data) {
                 distance,
                 date
             }
-            console.log("inserting",doc)
-            const result = await dataPoints.insertOne(doc);
+            console.log("updating",doc)
+            const objectId = '664116e78fb5b2099b4ab2eb';
+            const result = await distanceCollection.updateOne({_id: new ObjectId(objectId)}, {$set: doc});
             console.log(result)
-
-            //updateone 664116e78fb5b2099b4ab2eb
 
         } finally {
         }
@@ -154,5 +153,22 @@ export async function getData() {
         console.error('getdata: not connected!')
     }
     console.log('getdata time', new Date().getTime() - start);
+    return data;
+}
+
+export async function getDistance() {
+    console.log('getDistance api called')
+    const start = new Date().getTime()
+    let data = {distance: 0, date: start}
+    if (isConnected()) {
+      try {
+        data = await distanceCollection.findOne({_id: new ObjectId('664116e78fb5b2099b4ab2eb')});
+    } catch (error) {
+        console.error('getDistance: error fetching data', error);
+    }
+    } else {
+        console.error('getDistance: not connected!')
+    }
+    console.log('getDistance time', new Date().getTime() - start);
     return data;
 }

@@ -18,6 +18,14 @@ app.get('/data/', (req, res) => {
     res.json({ message: "Hello from Express!", data });
   })
 });
+app.get('/distance/', (req, res) => {
+  console.log('distance request received', req.body);
+
+  getDistance().then(data => {
+    console.log('Distance loaded:', data)
+    res.json({ message: "Hello from Express!", data });
+  })
+});
 
 // // let the react app to handle any unknown routes 
 // // serve up the index.html if express doesn't recognize the route
