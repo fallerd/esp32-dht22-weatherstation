@@ -25,7 +25,7 @@ function App() {
 
   return (
     <div className="App">
-      {!rawData ?
+      {rawData.length === 0 ?
         <p>Loading...</p> :
         <MainLayout rawData={rawData} distanceData={distanceData}/>
       }
