@@ -67,11 +67,6 @@ void setup() {
   InitWifi();
 
   getDistance();
-  // int chipId = ESP.getEfuseMac(); // NOT UNIQUE, must manually spec unique ids
-  int chipId = 10;
-
-  Serial.print("Sensor id #");
-  Serial.println(chipId);
 
   Serial.println("Posting data:");
 

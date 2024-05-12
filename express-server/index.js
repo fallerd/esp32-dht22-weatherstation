@@ -1,4 +1,4 @@
-import { update, updateDistance, getData } from './db.js'
+import { update, updateDistance, getData, getDistance } from './db.js'
 import express from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
