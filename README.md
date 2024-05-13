@@ -16,4 +16,6 @@ Raspberry Pi Zero W 2 doesn't have enough ram to build node modules for react-cl
 
 `ssh -t d@raspberrypi.local "cd ~/Desktop/esp32-dht22-weatherstation; bash"`
 `cd express-server`
+`pm2 list`
+`pm2 del 0` // view/kill old process if alive
 `pm2 start index.js` // must run inside express-server because that is where the .env resides. 

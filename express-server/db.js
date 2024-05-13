@@ -10,6 +10,7 @@ const dataPoints = database.collection('data');
 const databaseDistance = client.db('distance');
 const distanceCollection = databaseDistance.collection('distance');
 console.log(isConnected())
+const DistanceDocumentId = new ObjectId('664116e78fb5b2099b4ab2eb')
 
 function isConnected() {
     return !!client && !!client.topology && client.topology.isConnected()
@@ -45,8 +46,7 @@ export async function updateDistance(data) {
                 date
             }
             console.log("updating",doc)
-            const objectId = '664116e78fb5b2099b4ab2eb';
-            const result = await distanceCollection.updateOne({_id: new ObjectId(objectId)}, {$set: doc});
+            const result = await distanceCollection.updateOne({_id: DistanceDocumentId}, {$set: doc});
             console.log(result)
 
         } finally {
@@ -162,7 +162,7 @@ export async function getDistance() {
     let data = {distance: 0, date: start}
     if (isConnected()) {
       try {
-        data = await distanceCollection.findOne({_id: new ObjectId('664116e78fb5b2099b4ab2eb')});
+        data = await distanceCollection.findOne({_id: DistanceDocumentId});
     } catch (error) {
         console.error('getDistance: error fetching data', error);
     }
