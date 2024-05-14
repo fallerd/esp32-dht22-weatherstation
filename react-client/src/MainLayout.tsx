@@ -5,16 +5,10 @@ import Selector from "./Selector.js";
 import SensorsRow from "./SensorsRow.js";
 import { DefaultEnabledSensors, SensorNames } from "./SensorNames.js";
 import MultiSelector from "./MultiSelector.js";
-import Distance from "./Distance.js";
 
 type Sensor = {
     sensor: number,
     data: DataPoint[]
-}
-
-type Distance = {
-    distance: number,
-    date: number
 }
 
 enum DisplayModes {
@@ -80,10 +74,9 @@ const filterDataByDateRange = (rawData: Sensor[], daysAgo: number, enabledSensor
 }
 interface MainLayoutProps {
   rawData: Sensor[];
-  distanceData: Distance;
 }
 
-function MainLayout({ rawData, distanceData }: MainLayoutProps) {
+function MainLayout({ rawData }: MainLayoutProps) {
     const [dateRange, setDateRange] = useState(DateRanges.days7);
     const [displayMode, setDisplayMode] = useState(DisplayModes.current);
     const [enabledSensors, setEnabledSensors] = useState<EnabledSensors>(DefaultEnabledSensors);
@@ -110,7 +103,6 @@ function MainLayout({ rawData, distanceData }: MainLayoutProps) {
 
     return (
         <div className='graphColumn'>
-            <Distance distanceData={distanceData}/>
             <Selector values={DateRanges} currentValue={dateRange} setValue={setDateRange}/>
             <Selector values={DisplayModes} currentValue={displayMode} setValue={setDisplayMode}/>
             <SensorsRow originalData={filteredData} displayMode={displayMode} daysAgo={daysAgo}/>

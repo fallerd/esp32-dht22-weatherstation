@@ -1,6 +1,7 @@
 import './App.scss';
 import React from "react";
 import MainLayout from './MainLayout';
+import Distance from './Distance';
 
 function App() {
   const [rawData, setRawData] = React.useState([]);
@@ -25,9 +26,12 @@ function App() {
 
   return (
     <div className="App">
+      <Distance distanceData={distanceData}/>
       {rawData.length === 0 ?
         <p>Loading...</p> :
-        <MainLayout rawData={rawData} distanceData={distanceData}/>
+        <div className='main'>
+          <MainLayout rawData={rawData}/>
+        </div>
       }
     </div>
   );

@@ -7,9 +7,9 @@ function Distance({ distanceData }) {
     const upToDate = timeDifference < (3 * 60 * 1000) // 3 minutes
     const inGarage = distanceData.distance < 72;
 
-    const distanceHTML = () => (distanceData.distance > 0 && distanceData.Date > 0) ?
+    const distanceHTML = () => (distanceData.distance === 0 || distanceData.date === 0) ?
         <div class="distance">
-            <div>No Garage Data</div>
+            <div>Loading Garage Data...</div>
         </div>
         :
         <div class="distance">
