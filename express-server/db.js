@@ -56,12 +56,15 @@ export async function updateDistance(data) {
     }
 }
 
-function generateSensorAggregatePipeline(sensor) {
+function generateSensorAggregatePipeline(sensor, daysToShow) {
+    const dateLimit = daysToShow > 0 ? new Date(Date.now() - daysToShow * 24 * 60 * 60 * 1000) : null;
+
     return [
         {
-          '$match': {
-            'sensor': sensor
-          }
+            '$match': {
+                'sensor': sensor,
+                ...(dateLimit && { 'date': { '$gte': dateLimit } })
+            }
         }, {
           '$group': {
             '_id': {
@@ -111,8 +114,8 @@ function generateSensorAggregatePipeline(sensor) {
     ];
 }
 
-async function getSensorData(sensor) {
-    const pipeline = generateSensorAggregatePipeline(sensor)
+async function getSensorData(sensor, daysToShow) {
+    const pipeline = generateSensorAggregatePipeline(sensor, daysToShow)
 
     const aggCursor = dataPoints.aggregate(pipeline);
     
@@ -124,14 +127,14 @@ async function getSensorData(sensor) {
     return data
 }
 
-export async function getData() {
+export async function getData(daysToShow) {
     console.log('getdata api called')
     const start = new Date().getTime()
     const data = [];
 
     if (isConnected()) {
 
-        let [sensor1Data, sensor2Data, sensor3Data, sensor4Data] = await Promise.all([getSensorData('1'), getSensorData('2'), getSensorData('3'), getSensorData('4')]);
+        let [sensor1Data, sensor2Data, sensor3Data, sensor4Data] = await Promise.all([getSensorData('1', daysToShow), getSensorData('2', daysToShow), getSensorData('3', daysToShow), getSensorData('4', daysToShow)]);
 
         data.push(...[{
             sensor: '1',

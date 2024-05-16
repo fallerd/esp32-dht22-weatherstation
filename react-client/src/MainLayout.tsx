@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Chart from './Chart.js';
 import "./MainLayout.scss"
 import Selector from "./Selector.js";
@@ -31,7 +31,7 @@ export const DateRangeMap = {
     [DateRanges.days3]: 3,
     [DateRanges.days7]: 7,
     [DateRanges.days30]: 30,
-    [DateRanges.daysAll]: Infinity
+    [DateRanges.daysAll]: -1
 }
 
 type DataPoint = {
@@ -44,7 +44,7 @@ type EnabledSensors = {[key: string]: Boolean}
 
 const filterDataByDateRange = (rawData: Sensor[], daysAgo: number, enabledSensors: EnabledSensors) => {
     const filteredData: Sensor[] = []; 
-    if (daysAgo === Infinity) {
+    if (daysAgo === DateRangeMap[DateRanges.daysAll]) {
         for (const sensor of rawData) {
             if (enabledSensors[sensor.sensor]) {
                 filteredData.push(sensor);
@@ -74,12 +74,18 @@ const filterDataByDateRange = (rawData: Sensor[], daysAgo: number, enabledSensor
 }
 interface MainLayoutProps {
   rawData: Sensor[];
+  setDays: Function;
+  days: number;
 }
 
-function MainLayout({ rawData }: MainLayoutProps) {
+function MainLayout({ rawData, days, setDays }: MainLayoutProps) {
     const [dateRange, setDateRange] = useState(DateRanges.days7);
     const [displayMode, setDisplayMode] = useState(DisplayModes.current);
     const [enabledSensors, setEnabledSensors] = useState<EnabledSensors>(DefaultEnabledSensors);
+
+    useEffect(() => {
+        setDays(DateRangeMap[dateRange]);
+    }, [dateRange]);
 
     const toggleSensor = (sensor: string) => {
         let enabledSensorCount = 0;
@@ -97,15 +103,13 @@ function MainLayout({ rawData }: MainLayoutProps) {
         setEnabledSensors(enabledSensorsTemp)
     }
 
-    const daysAgo = DateRangeMap[dateRange];
-
-    const filteredData = filterDataByDateRange(rawData, daysAgo, enabledSensors); 
+    const filteredData = filterDataByDateRange(rawData, days, enabledSensors); 
 
     return (
         <div className='graphColumn'>
             <Selector values={DateRanges} currentValue={dateRange} setValue={setDateRange}/>
             <Selector values={DisplayModes} currentValue={displayMode} setValue={setDisplayMode}/>
-            <SensorsRow originalData={filteredData} displayMode={displayMode} daysAgo={daysAgo}/>
+            <SensorsRow originalData={filteredData} displayMode={displayMode} daysAgo={days}/>
             <MultiSelector values={SensorNames} currentValue={enabledSensors} toggleValue={toggleSensor}/>
             <span className='title'>Temperature</span>
             <Chart originalData={filteredData} type="temp"/>

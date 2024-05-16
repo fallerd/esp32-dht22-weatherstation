@@ -2,6 +2,7 @@ import React from "react";
 import { SensorNames } from "./SensorNames";
 import Sensor from "./Sensor";
 import "./SensorsRow.scss"
+import { DateRangeMap, DateRanges } from "./MainLayout";
 
 function SensorsRow({ originalData, displayMode, daysAgo }) {
     const sensors = []
@@ -32,7 +33,7 @@ function SensorsRow({ originalData, displayMode, daysAgo }) {
                 totalHum += data.humidity;
                 count++;
 
-                if (data.date < now - (24 * 60 * 60 * 1000 * daysAgo)) {
+                if (data.date < now - (24 * 60 * 60 * 1000 * daysAgo) && daysAgo !== DateRangeMap[DateRanges.daysAll]) {
                     break;
                 }
             }
@@ -66,7 +67,7 @@ function SensorsRow({ originalData, displayMode, daysAgo }) {
                     }
                 }
     
-                if (data.date < now - (24 * 60 * 60 * 1000 * daysAgo)) {
+                if (data.date < now - (24 * 60 * 60 * 1000 * daysAgo) && daysAgo !== DateRangeMap[DateRanges.daysAll]) {
                     break;
                 }
             }

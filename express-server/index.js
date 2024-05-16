@@ -1,7 +1,6 @@
 import { update, updateDistance, getData, getDistance } from './db.js'
 import express from 'express';
 import bodyParser from 'body-parser';
-import path from 'path';
 
 const port = 3000;
 const app = express();
@@ -12,8 +11,9 @@ app.use(express.static('../react-client/build'));
 
 app.get('/data/', (req, res) => {
   console.log('request received', req.body);
+  const daysToShow = req.query.days;
 
-  getData().then(data => {
+  getData(daysToShow).then(data => {
     console.log('Data loaded:', data.length > 0)
     res.json({ message: "Hello from Express!", data });
   })
@@ -26,12 +26,6 @@ app.get('/distance/', (req, res) => {
     res.json({ message: "Hello from Express!", data });
   })
 });
-
-// // let the react app to handle any unknown routes 
-// // serve up the index.html if express doesn't recognize the route
-// app.get('*', (req, res) => {
-//   res.sendFile(path.resolve(__dirname, 'react-client', 'build', 'index.html')); // FAILING DUE TO PATHS
-// });
 
 app.post("/addData/", function (req, res) {
   console.log('request received', req.body);
