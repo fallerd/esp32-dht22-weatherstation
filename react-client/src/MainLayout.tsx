@@ -34,6 +34,15 @@ export const DateRangeMap = {
     [DateRanges.daysAll]: -1
 }
 
+const getDateRange = (days: number) => {
+    for (const key of Object.keys(DateRangeMap)) {
+        if (DateRangeMap[key as DateRanges] === days) {
+            return key;
+        }
+    }
+    return DateRanges.days7;
+}
+
 type DataPoint = {
     temp: number,
     humidity: number,
@@ -76,16 +85,12 @@ interface MainLayoutProps {
   rawData: Sensor[];
   setDays: Function;
   days: number;
+  loading: boolean;
 }
 
-function MainLayout({ rawData, days, setDays }: MainLayoutProps) {
-    const [dateRange, setDateRange] = useState(DateRanges.days7);
+function MainLayout({ rawData, days, setDays, loading }: MainLayoutProps) {
     const [displayMode, setDisplayMode] = useState(DisplayModes.current);
     const [enabledSensors, setEnabledSensors] = useState<EnabledSensors>(DefaultEnabledSensors);
-
-    useEffect(() => {
-        setDays(DateRangeMap[dateRange]);
-    }, [dateRange]);
 
     const toggleSensor = (sensor: string) => {
         let enabledSensorCount = 0;
@@ -105,16 +110,23 @@ function MainLayout({ rawData, days, setDays }: MainLayoutProps) {
 
     const filteredData = filterDataByDateRange(rawData, days, enabledSensors); 
 
+    const dateRange = getDateRange(days);
+    const setDateRange = (dateRange: DateRanges) => {
+        setDays(DateRangeMap[dateRange]);
+    }
+
     return (
         <div className='graphColumn'>
-            <Selector values={DateRanges} currentValue={dateRange} setValue={setDateRange}/>
-            <Selector values={DisplayModes} currentValue={displayMode} setValue={setDisplayMode}/>
-            <SensorsRow originalData={filteredData} displayMode={displayMode} daysAgo={days}/>
-            <MultiSelector values={SensorNames} currentValue={enabledSensors} toggleValue={toggleSensor}/>
-            <span className='title'>Temperature</span>
-            <Chart originalData={filteredData} type="temp"/>
-            <span className='title'>Humidity</span>
-            <Chart originalData={filteredData} type="humidity"/>
+            <Selector values={DateRanges} currentValue={dateRange} setValue={setDateRange} loading={loading}/>
+            <div className={loading ? 'loading graphColumn' : 'graphColumn'}>
+                <Selector values={DisplayModes} currentValue={displayMode} setValue={setDisplayMode}/>
+                <SensorsRow originalData={filteredData} displayMode={displayMode} daysAgo={days}/>
+                <MultiSelector values={SensorNames} currentValue={enabledSensors} toggleValue={toggleSensor}/>
+                <span className='title'>Temperature</span>
+                <Chart originalData={filteredData} type="temp"/>
+                <span className='title'>Humidity</span>
+                <Chart originalData={filteredData} type="humidity"/>
+            </div>
         </div>
     );
 }

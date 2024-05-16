@@ -1,6 +1,6 @@
 import './App.scss';
 import React, { useEffect, useState } from "react";
-import MainLayout from './MainLayout';
+import MainLayout, { DateRangeMap, DateRanges } from './MainLayout';
 import Distance from './Distance';
 
 function App() {
@@ -9,18 +9,24 @@ function App() {
     distance: 0,
     date: 0
   });
-  const [days, setDays] = useState(7);
   const [loadingData, setLoadingData] = useState(true);
+  const [days, setDays] = useState(DateRangeMap[DateRanges.days7]);
 
   useEffect(() => {
     setLoadingData(true);
-    fetch(`/data?days=${days}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setRawData(data.data)
-        setLoadingData(false);
-      });
   }, [days]);
+
+  useEffect(() => {
+    // fetching data follows loadingData, otherwise it was possible data could load before async setLoadingData completed, causing flashing
+    if (loadingData) {
+      fetch(`/data?days=${days}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setRawData(data.data)
+          setLoadingData(false);
+        });
+    }
+  }, [loadingData]);
 
   useEffect(() => {
     fetch("/distance")
@@ -30,13 +36,15 @@ function App() {
       });
   }, []);
 
+  const initialLoad = rawData.length === 0;
+
   return (
     <div className="App">
       <Distance distanceData={distanceData}/>
-      {loadingData ?
+      { initialLoad ?
         <p>Loading...</p> :
         <div className='main'>
-          <MainLayout rawData={rawData} days={days} setDays={setDays}/>
+          <MainLayout rawData={rawData} days={days} setDays={setDays} loading={loadingData}/>
         </div>
       }
     </div>
