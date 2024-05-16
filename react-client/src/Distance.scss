@@ -8,4 +8,22 @@
     .error {
         color: red;
     }
+
+    .loading {
+        height: 30px;
+    }
+
+    .refresh-icon {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .result-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+    }
 }

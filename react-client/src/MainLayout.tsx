@@ -5,6 +5,7 @@ import Selector from "./Selector.js";
 import SensorsRow from "./SensorsRow.js";
 import { DefaultEnabledSensors, SensorNames } from "./SensorNames.js";
 import MultiSelector from "./MultiSelector.js";
+import { TiRefresh } from "react-icons/ti";
 
 type Sensor = {
     sensor: number,
@@ -84,11 +85,12 @@ const filterDataByDateRange = (rawData: Sensor[], daysAgo: number, enabledSensor
 interface MainLayoutProps {
   rawData: Sensor[];
   setDays: Function;
+  refreshData: (event: any) => void;
   days: number;
   loading: boolean;
 }
 
-function MainLayout({ rawData, days, setDays, loading }: MainLayoutProps) {
+function MainLayout({ rawData, days, setDays, loading, refreshData }: MainLayoutProps) {
     const [displayMode, setDisplayMode] = useState(DisplayModes.current);
     const [enabledSensors, setEnabledSensors] = useState<EnabledSensors>(DefaultEnabledSensors);
 
@@ -118,6 +120,7 @@ function MainLayout({ rawData, days, setDays, loading }: MainLayoutProps) {
     return (
         <div className='graphColumn'>
             <Selector values={DateRanges} currentValue={dateRange} setValue={setDateRange} loading={loading}/>
+            <div className="refresh-row" onClick={refreshData}><TiRefresh className="refresh-icon" />Refresh Data</div>
             <div className={loading ? 'loading graphColumn' : 'graphColumn'}>
                 <Selector values={DisplayModes} currentValue={displayMode} setValue={setDisplayMode}/>
                 <SensorsRow originalData={filteredData} displayMode={displayMode} daysAgo={days}/>

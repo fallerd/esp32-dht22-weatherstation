@@ -10,3 +10,18 @@
 .loading {
     opacity: 0.5;
 }
+
+.refresh-icon {
+    width: 30px;
+    height: 30px;
+}
+
+.refresh-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 3px;
+    font-size: 12px;
+    margin-top: 10px;
+    cursor: pointer;
+}

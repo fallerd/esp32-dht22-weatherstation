@@ -29,22 +29,36 @@ function App() {
   }, [loadingData]);
 
   useEffect(() => {
-    fetch("/distance")
+    if (distanceData.distance === 0) {
+      fetch("/distance")
       .then((res) => res.json())
       .then((data) => {
         setDistanceData(data.data)
       });
-  }, []);
+    }
+  }, [distanceData]);
+
+  const getDistance = () => {
+    //setting to 0 will trigger reload
+    setDistanceData({
+      distance: 0,
+      date: 0
+    });
+  }
+
+  const refreshData = () => {
+    setLoadingData(true);
+  }
 
   const initialLoad = rawData.length === 0;
 
   return (
     <div className="App">
-      <Distance distanceData={distanceData}/>
+      <Distance distanceData={distanceData} getDistance={getDistance}/>
       { initialLoad ?
         <p>Loading...</p> :
         <div className='main'>
-          <MainLayout rawData={rawData} days={days} setDays={setDays} loading={loadingData}/>
+          <MainLayout rawData={rawData} days={days} setDays={setDays} loading={loadingData} refreshData={refreshData}/>
         </div>
       }
     </div>
