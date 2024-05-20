@@ -1,12 +1,25 @@
 import { update, updateDistance, getData, getDistance } from './db.js'
 import express from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 
 const port = 3000;
 const app = express();
 
 // parse application/json
 app.use(bodyParser.json());
+app.use(cors({
+  origin: function(origin, callback){
+    // allow requests with no origin 
+    // (like mobile apps or curl requests)
+    if(!origin) return callback(null, true);
+    if(origin.startsWith('http://192.168.')) {
+      return callback(null, true)
+    } else {
+      return callback(new Error('Not allowed by CORS'))
+    }
+  }
+}));
 app.use(express.static('../react-client/build'));
 
 app.get('/data/', (req, res) => {
