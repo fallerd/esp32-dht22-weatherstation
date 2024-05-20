@@ -8,9 +8,6 @@ To run react app via the express server, must first do `npm run build` in /react
 
 TODO: create script that runs react-client build whenever express is run...
 
-With apologies to:
-https://medium.com/initial-state/how-to-build-your-own-esp32-temperature-monitor-6967b797b913
-
 Raspberry Pi Zero W 2 doesn't have enough ram to build node modules for react-client, so just SFTP the build files to the PI instead.
 `scp -r ./react-client/build d@raspberrypi.local:~/Desktop/esp32-dht22-weatherstation/react-client` - MUST run from project root
 
@@ -20,3 +17,6 @@ pm2 list
 pm2 del 0 // view/kill old process if alive
 pm2 start index.js // must run inside express-server because that is where the .env resides. 
 ```
+
+Some credit to:
+https://medium.com/initial-state/how-to-build-your-own-esp32-temperature-monitor-6967b797b913
