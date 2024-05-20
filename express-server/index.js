@@ -10,6 +10,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors({
   origin: function(origin, callback){
+    console.log('cors',origin)
     // allow requests with no origin 
     // (like mobile apps or curl requests)
     if(!origin) return callback(null, true);
