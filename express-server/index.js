@@ -14,7 +14,7 @@ app.use(cors({
     // allow requests with no origin 
     // (like mobile apps or curl requests)
     if(!origin) return callback(null, true);
-    if(origin.startsWith('http://192.168.')) {
+    if(origin === 'http://localhost:3000') {
       return callback(null, true)
     } else {
       return callback(new Error('Not allowed by CORS'))
