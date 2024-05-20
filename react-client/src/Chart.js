@@ -67,25 +67,77 @@ function Chart({ originalData, type }) {
             .attr("x2", width - marginLeft - marginRight)
             .attr("stroke-opacity", 0.1))
 
+    let legends = {};
 
     // add lines
     dataNest.forEach(function(d,i) { 
       svg.append("path")
-          .style("fill", "none")
-          .style("stroke", function() {
-              return d.color = SensorColors[d.key]; })
-          .attr("d", line(d.value));
+        .style("fill", "none")
+        .style("stroke", function() {
+            return d.color = SensorColors[d.key]; })
+        .attr("d", line(d.value));
 
-      // // Add the Legend
-      svg.append("text")
-          .attr("x", 0)  // space legend
-          .attr("y", 100 + (i * 20))
-          .attr("class", "legend")    // style the legend
-          .style("fill", function() {
-              return d.color = SensorColors[d.key]; })
-          .text(d.key); 
+      // Add the Legend
+      const legend = svg.append("text")
+        .attr("x", 0)  // space legend
+        .attr("y", 100 + (i * 20))
+        .attr("class", "legend") // style the legend
+        .style("fill", function() {
+            return d.color = SensorColors[d.key]; })
+        .text(d.key);
+    
+      // Store the legend in the array
+      legends[d.key] = legend;
     });
-}, [originalData]);
+
+    const hoverLine = svg.append("line")
+    .style("stroke", "#fff")
+    .style("stroke-width", 1)
+    .style("opacity", 0)  // initially hidden
+    .attr("y1", marginTop)
+    .attr("y2", height - marginBottom);
+
+    const hoverText = svg.append("text")
+      .attr("opacity", 0) // initially hidden
+      .attr("text-anchor", "start")
+      .attr("font-size", "12px")
+      .attr("fill", "white")
+      .attr("x", 0)
+      .attr("y", 80); // position at the top of legend
+
+    svg.on("mousemove", function(event) {
+      const mouseX = d3.pointer(event)[0];
+      hoverLine.attr("x1", mouseX).attr("x2", mouseX); // move the line where the mouse is
+
+      // Calculate the corresponding data for the x position.
+      const xValue = x.invert(mouseX);
+      dataNest.forEach(({ key, value }) => {
+        // Find the data point that's closest to the x position.
+        const i = d3.bisectLeft(value.map(d => d.date), xValue);
+        const d0 = value[i - 1];
+        const d1 = value[i];
+        // update legend text with data points
+        if (d0 && d1) {
+          const d = xValue - d0.date > d1.date - xValue ? d1 : d0;
+          legends[key].text(`${key}: ${d[type]}`);
+        } else {
+          legends[key].text(`${key}`);
+        }
+      });
+
+      const date = new Date(xValue);
+      const formattedTime = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+      hoverText.text(`${formattedTime}`);
+    })
+    .on("mouseover", function() {
+      hoverLine.style("opacity", .5);
+      hoverText.attr("opacity", 1);
+    })
+    .on("mouseout", function() {
+      hoverLine.style("opacity", 0);
+      hoverText.attr("opacity", 0);
+    });
+}, [originalData, type]);
 
   return (
     <div ref={ref}/>

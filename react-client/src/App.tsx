@@ -11,6 +11,7 @@ function App() {
   });
   const [loadingData, setLoadingData] = useState(true);
   const [days, setDays] = useState(DateRangeMap[DateRanges.days7]);
+  const API_BASE_URL = ''; // set to http://192.168.0.69:3000 when in development, '' for prod build
 
   useEffect(() => {
     setLoadingData(true);
@@ -19,23 +20,26 @@ function App() {
   useEffect(() => {
     // fetching data follows loadingData, otherwise it was possible data could load before async setLoadingData completed, causing flashing
     if (loadingData) {
-      fetch(`/data?days=${days}`)
+      fetch(`${API_BASE_URL}/data?days=${days}`)
         .then((res) => res.json())
         .then((data) => {
           setRawData(data.data)
           setLoadingData(false);
         });
     }
+  // stop eslint complaining about days, which is intentionally not included
+  // eslint-disable-next-line
   }, [loadingData]);
 
   useEffect(() => {
     if (distanceData.distance === 0) {
-      fetch("/distance")
+      fetch(`${API_BASE_URL}/distance`)
       .then((res) => res.json())
       .then((data) => {
         setDistanceData(data.data)
       });
     }
+
   }, [distanceData]);
 
   const getDistance = () => {

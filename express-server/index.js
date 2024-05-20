@@ -8,6 +8,7 @@ const app = express();
 
 // parse application/json
 app.use(bodyParser.json());
+// allow cors only from localhost:3000 for local react app development
 app.use(cors({
   origin: function(origin, callback){
     console.log('cors',origin)

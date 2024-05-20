@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Chart from './Chart.js';
 import "./MainLayout.scss"
 import Selector from "./Selector.js";

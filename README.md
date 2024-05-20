@@ -14,8 +14,9 @@ https://medium.com/initial-state/how-to-build-your-own-esp32-temperature-monitor
 Raspberry Pi Zero W 2 doesn't have enough ram to build node modules for react-client, so just SFTP the build files to the PI instead.
 `scp -r ./react-client/build d@raspberrypi.local:~/Desktop/esp32-dht22-weatherstation/react-client` - MUST run from project root
 
-`ssh -t d@raspberrypi.local "cd ~/Desktop/esp32-dht22-weatherstation; bash"`
-`cd express-server`
-`pm2 list`
-`pm2 del 0` // view/kill old process if alive
-`pm2 start index.js` // must run inside express-server because that is where the .env resides. 
+```
+ssh -t d@raspberrypi.local "cd ~/Desktop/esp32-dht22-weatherstation/express-server; bash"
+pm2 list
+pm2 del 0 // view/kill old process if alive
+pm2 start index.js // must run inside express-server because that is where the .env resides. 
+```
