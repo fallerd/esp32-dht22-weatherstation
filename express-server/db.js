@@ -5,7 +5,6 @@ const mongoInfo = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_P
 const client = new MongoClient(mongoInfo);
 client.connect()
 const database = client.db('weather');
-const sensors = database.collection('sensors');
 const dataPoints = database.collection('data');
 const databaseDistance = client.db('distance');
 const distanceCollection = databaseDistance.collection('distance');
