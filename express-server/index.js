@@ -27,6 +27,7 @@ app.use(express.static('../react-client/build'));
 app.get('/data/', (req, res) => {
   console.log('request received', req.body);
   const daysToShow = req.query.days;
+  console.log("showing days",daysToShow)
 
   getData(daysToShow).then(data => {
     console.log('Data loaded:', data.length > 0)
