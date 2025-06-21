@@ -52,36 +52,55 @@ type DataPoint = {
 
 type EnabledSensors = {[key: string]: Boolean}
 
-const filterDataByDateRange = (rawData: Sensor[], daysAgo: number, enabledSensors: EnabledSensors) => {
+function computeDerivative(data: DataPoint[]): DataPoint[] {
+    const derived: DataPoint[] = [];
+
+    for (let i = 1; i < data.length; i++) {
+        const dt = (data[i].date - data[i - 1].date) / 1000; // convert ms to seconds
+        if (dt === 0) continue;
+
+        const dTemp = (data[i].temp - data[i - 1].temp) / dt;
+        const dHumidity = (data[i].humidity - data[i - 1].humidity) / dt;
+
+        derived.push({
+            date: (data[i].date + data[i - 1].date) / 2,
+            temp: dTemp,
+            humidity: dHumidity
+        });
+    }
+
+    return derived;
+}
+
+const filterDataByDateRange = (
+    rawData: Sensor[],
+    daysAgo: number,
+    enabledSensors: EnabledSensors,
+    includeDerivative: boolean = false
+): Sensor[] => {
     const filteredData: Sensor[] = []; 
-    if (daysAgo === DateRangeMap[DateRanges.daysAll]) {
-        for (const sensor of rawData) {
-            if (enabledSensors[sensor.sensor]) {
-                filteredData.push(sensor);
-            }
-        }
-    } else {
-        for (const sensor of rawData) {
-            if (enabledSensors[sensor.sensor]) {
-                const sensorFiltered: Sensor = {
-                    sensor: sensor.sensor,
-                    data: []
-                }
-                const dateOffset = (24*60*60*1000) * daysAgo;
-                const now = new Date();
-                const filterMillis = now.getTime() - dateOffset;
-                for (const data of sensor.data) {
-                    if (data.date > filterMillis) {
-                        sensorFiltered.data.push(data);
-                    } 
-                }
-                filteredData.push(sensorFiltered);
-            }
-        }
-    } 
+    const dateOffset = (24 * 60 * 60 * 1000) * daysAgo;
+    const now = new Date();
+    const filterMillis = now.getTime() - dateOffset;
+
+    for (const sensor of rawData) {
+        if (!enabledSensors[sensor.sensor]) continue;
+
+        const dataToFilter = daysAgo === DateRangeMap[DateRanges.daysAll]
+            ? sensor.data
+            : sensor.data.filter(d => d.date > filterMillis);
+
+        const data = includeDerivative ? computeDerivative(dataToFilter) : dataToFilter;
+
+        filteredData.push({
+            sensor: sensor.sensor,
+            data
+        });
+    }
 
     return filteredData;
-}
+};
+
 interface MainLayoutProps {
   rawData: Sensor[];
   setDays: Function;
@@ -110,7 +129,7 @@ function MainLayout({ rawData, days, setDays, loading, refreshData }: MainLayout
         setEnabledSensors(enabledSensorsTemp)
     }
 
-    const filteredData = filterDataByDateRange(rawData, days, enabledSensors); 
+    const filteredData = filterDataByDateRange(rawData, days, enabledSensors, true); 
 
     const dateRange = getDateRange(days);
     const setDateRange = (dateRange: DateRanges) => {
