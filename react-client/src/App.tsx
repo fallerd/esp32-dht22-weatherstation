@@ -10,7 +10,7 @@ function App() {
     date: 0
   });
   const [loadingData, setLoadingData] = useState(true);
-  const [days, setDays] = useState(DateRangeMap[DateRanges.days7]);
+  const [days, setDays] = useState(DateRangeMap[DateRanges.days3]);
   const API_BASE_URL = ''; // set to http://192.168.0.69:3000 when in development, '' for prod build
 
   useEffect(() => {

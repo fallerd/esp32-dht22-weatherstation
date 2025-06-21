@@ -19,7 +19,13 @@ enum DisplayModes {
     avg = "Avg"
 }
 
+enum StandardDerivativeModes {
+    standard = "Standard",
+    derivative = "Derivative",
+}
+
 export enum DateRanges {
+    hours12 = "12 Hrs",
     days1 = "1 Day",
     days3 = "3 Days",
     days7 = "7 Days",
@@ -28,6 +34,7 @@ export enum DateRanges {
 }
 
 export const DateRangeMap = {
+    [DateRanges.hours12]: .5,
     [DateRanges.days1]: 1,
     [DateRanges.days3]: 3,
     [DateRanges.days7]: 7,
@@ -41,7 +48,7 @@ const getDateRange = (days: number) => {
             return key;
         }
     }
-    return DateRanges.days7;
+    return DateRanges.days3;
 }
 
 type DataPoint = {
@@ -50,7 +57,7 @@ type DataPoint = {
     date: number
 }
 
-type EnabledSensors = {[key: string]: Boolean}
+type EnabledSensors = { [key: string]: Boolean }
 
 function computeDerivative(data: DataPoint[]): DataPoint[] {
     const derived: DataPoint[] = [];
@@ -64,8 +71,8 @@ function computeDerivative(data: DataPoint[]): DataPoint[] {
 
         derived.push({
             date: (data[i].date + data[i - 1].date) / 2,
-            temp: dTemp,
-            humidity: dHumidity
+            temp: Math.trunc(dTemp * 1e6) / 1e6,
+            humidity: Math.trunc(dHumidity * 1e6) / 1e6
         });
     }
 
@@ -78,7 +85,7 @@ const filterDataByDateRange = (
     enabledSensors: EnabledSensors,
     includeDerivative: boolean = false
 ): Sensor[] => {
-    const filteredData: Sensor[] = []; 
+    const filteredData: Sensor[] = [];
     const dateOffset = (24 * 60 * 60 * 1000) * daysAgo;
     const now = new Date();
     const filterMillis = now.getTime() - dateOffset;
@@ -102,15 +109,16 @@ const filterDataByDateRange = (
 };
 
 interface MainLayoutProps {
-  rawData: Sensor[];
-  setDays: Function;
-  refreshData: (event: any) => void;
-  days: number;
-  loading: boolean;
+    rawData: Sensor[];
+    setDays: Function;
+    refreshData: (event: any) => void;
+    days: number;
+    loading: boolean;
 }
 
 function MainLayout({ rawData, days, setDays, loading, refreshData }: MainLayoutProps) {
     const [displayMode, setDisplayMode] = useState(DisplayModes.current);
+    const [standardDerivativeMode, setStandardDerivativeMode] = useState(StandardDerivativeModes.standard);
     const [enabledSensors, setEnabledSensors] = useState<EnabledSensors>(DefaultEnabledSensors);
 
     const toggleSensor = (sensor: string) => {
@@ -129,7 +137,7 @@ function MainLayout({ rawData, days, setDays, loading, refreshData }: MainLayout
         setEnabledSensors(enabledSensorsTemp)
     }
 
-    const filteredData = filterDataByDateRange(rawData, days, enabledSensors, true); 
+    const filteredData = filterDataByDateRange(rawData, days, enabledSensors, standardDerivativeMode === StandardDerivativeModes.derivative);
 
     const dateRange = getDateRange(days);
     const setDateRange = (dateRange: DateRanges) => {
@@ -138,16 +146,17 @@ function MainLayout({ rawData, days, setDays, loading, refreshData }: MainLayout
 
     return (
         <div className='graphColumn'>
-            <Selector values={DateRanges} currentValue={dateRange} setValue={setDateRange} loading={loading}/>
+            <Selector values={DateRanges} currentValue={dateRange} setValue={setDateRange} loading={loading} />
             <div className="refresh-row" onClick={refreshData}><TiRefresh className="refresh-icon" />Refresh Data</div>
             <div className={loading ? 'loading graphColumn' : 'graphColumn'}>
-                <Selector values={DisplayModes} currentValue={displayMode} setValue={setDisplayMode}/>
-                <SensorsRow originalData={filteredData} displayMode={displayMode} daysAgo={days}/>
-                <MultiSelector values={SensorNames} currentValue={enabledSensors} toggleValue={toggleSensor}/>
+                <Selector values={DisplayModes} currentValue={displayMode} setValue={setDisplayMode} />
+                <SensorsRow originalData={filteredData} displayMode={displayMode} daysAgo={days} />
+                <MultiSelector values={SensorNames} currentValue={enabledSensors} toggleValue={toggleSensor} />
+                <Selector values={StandardDerivativeModes} currentValue={standardDerivativeMode} setValue={setStandardDerivativeMode} />
                 <span className='title'>Temperature</span>
-                <Chart originalData={filteredData} type="temp"/>
+                <Chart originalData={filteredData} type="temp" />
                 <span className='title'>Humidity</span>
-                <Chart originalData={filteredData} type="humidity"/>
+                <Chart originalData={filteredData} type="humidity" />
             </div>
         </div>
     );

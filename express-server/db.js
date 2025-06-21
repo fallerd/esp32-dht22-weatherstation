@@ -58,8 +58,8 @@ export async function updateDistance(data) {
 function generateSensorAggregatePipeline(sensor, daysToShow) {
     const dateLimit = daysToShow > 0 ? new Date(Date.now() - daysToShow * 24 * 60 * 60 * 1000) : null;
 
-    // Raw data passthrough for last 24 hours
-    if (parseInt(daysToShow) === 1) {
+    // Raw data passthrough for last 12/24 hours
+    if (parseInt(daysToShow) <= 1) {
         return [
             {
                 '$match': {
