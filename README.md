@@ -27,5 +27,12 @@ pm2 del 0 // view/kill old process if alive
 pm2 start index.js // must run inside express-server because that is where the .env resides. 
 ```
 
+# Startup config on linux (one time only):
+
+```
+pm2 save # after running app as above, save list of running apps for next startup
+pm2 startup # initialize pm2 startup script for this particular machine
+```
+
 Some credit to:
 https://medium.com/initial-state/how-to-build-your-own-esp32-temperature-monitor-6967b797b913

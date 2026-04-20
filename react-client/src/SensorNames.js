@@ -7,6 +7,13 @@ export const SensorNames = {
     "4": "Attic"
 }
 
+export const NamesToSensors = {
+    "Train": "2",
+    "Office": "1",
+    "Outside": "3",
+    "Attic": "4"
+}
+
 export const DefaultEnabledSensors = {
     "1": true,
     "2": true,

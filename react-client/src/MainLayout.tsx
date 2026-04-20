@@ -3,12 +3,12 @@ import Chart from './Chart.js';
 import "./MainLayout.scss"
 import Selector from "./Selector.js";
 import SensorsRow from "./SensorsRow.js";
-import { DefaultEnabledSensors, SensorNames } from "./SensorNames.js";
+import { DefaultEnabledSensors, NamesToSensors, SensorNames } from "./SensorNames.js";
 import MultiSelector from "./MultiSelector.js";
 import { TiRefresh } from "react-icons/ti";
 
 type Sensor = {
-    sensor: number,
+    sensor: string,
     data: DataPoint[]
 }
 
@@ -61,13 +61,19 @@ type EnabledSensors = { [key: string]: Boolean }
 
 function computeDerivative(data: DataPoint[]): DataPoint[] {
     const derived: DataPoint[] = [];
+    const clamp = (value: number, min: number, max: number): number =>
+        Math.max(min, Math.min(max, value));
 
     for (let i = 1; i < data.length; i++) {
         const dt = (data[i].date - data[i - 1].date) / 1000; // convert ms to seconds
         if (dt === 0) continue;
 
-        const dTemp = (data[i].temp - data[i - 1].temp) / dt;
-        const dHumidity = (data[i].humidity - data[i - 1].humidity) / dt;
+        let dTemp = (data[i].temp - data[i - 1].temp) / dt;
+        let dHumidity = (data[i].humidity - data[i - 1].humidity) / dt;
+
+        // Clamp to ±0.006 to tone down buggy peaks
+        dTemp = clamp(dTemp, -0.006, 0.006);
+        dHumidity = clamp(dHumidity, -0.006, 0.006);
 
         derived.push({
             date: (data[i].date + data[i - 1].date) / 2,
@@ -144,6 +150,67 @@ function MainLayout({ rawData, days, setDays, loading, refreshData }: MainLayout
         setDays(DateRangeMap[dateRange]);
     }
 
+    function getTemperatureColor(differential: number): string {
+        const clampValue = 15 // Clamp between -15 and 15
+        const clampedDiff = Math.max(-clampValue, Math.min(clampValue, differential));
+        const ratio = clampedDiff / clampValue; // Normalize to [-1, 1]
+    
+        let red = 255;
+        let green = 255;
+        let blue = 255;
+    
+        if (ratio > 0) {
+            // Warmer: from white to red
+            blue = green = Math.round(255 * (1 - ratio)); // Remove green & blue as it gets hotter
+        } else if (ratio < 0) {
+            // Colder: from white to blue (keep a little greener so not as harsh blue)
+            const fade = Math.round(255 * (1 + ratio));
+            red = fade;
+            green = Math.round(128 + (255 - 128) * ((ratio + 1) / 1));
+        }
+    
+        return `rgb(${red}, ${green}, ${blue})`;
+    }
+
+    const differential = (() => {
+        const outsideTempData = filteredData.find((sensor) => sensor.sensor === NamesToSensors.Outside)?.data
+        const insideTempData = filteredData.find((sensor) => sensor.sensor === NamesToSensors.Office)?.data
+        if (!outsideTempData || !insideTempData) return null;
+        const outsideTemp = outsideTempData[outsideTempData.length-1].temp;
+        const insideTemp = insideTempData[insideTempData.length-1].temp;
+        return outsideTemp - insideTemp;
+    })();
+
+    const diffColor = differential !== null ? getTemperatureColor(differential) : '#ccc';
+
+    const differentialData = (() => {
+        try {
+            const outsideTempData = filteredData.find((sensor) => sensor.sensor === NamesToSensors.Outside)?.data
+            const insideTempData = filteredData.find((sensor) => sensor.sensor === NamesToSensors.Office)?.data
+            if (!outsideTempData || !insideTempData) return null;
+            const diffData: any[] = [];
+            for (let i=0; i<outsideTempData.length; i++) {
+                const outData = outsideTempData[i];
+                const inData = insideTempData[i];
+                if (!outData || !inData) continue;
+                diffData.push({
+                    "differential": parseFloat((outData.temp - insideTempData[i].temp).toFixed(1)),
+                    "date": outData.date
+                })
+            }
+            const formattedData= [
+                {
+                "sensor": "1",
+                "data": diffData
+                }
+            ]
+            return formattedData;
+        } catch (e) {
+            console.log('differentialdata error:', e)
+            return null
+        }
+    })();
+
     return (
         <div className='graphColumn'>
             <Selector values={DateRanges} currentValue={dateRange} setValue={setDateRange} loading={loading} />
@@ -153,10 +220,19 @@ function MainLayout({ rawData, days, setDays, loading, refreshData }: MainLayout
                 <SensorsRow originalData={filteredData} displayMode={displayMode} daysAgo={days} />
                 <MultiSelector values={SensorNames} currentValue={enabledSensors} toggleValue={toggleSensor} />
                 <Selector values={StandardDerivativeModes} currentValue={standardDerivativeMode} setValue={setStandardDerivativeMode} />
+                <span style={{ color: diffColor, fontSize: "16px", marginTop:"20px" }}>
+                    Outside Temp Differential: {differential?.toFixed(1)}°F
+                </span>
                 <span className='title'>Temperature</span>
                 <Chart originalData={filteredData} type="temp" />
                 <span className='title'>Humidity</span>
                 <Chart originalData={filteredData} type="humidity" />
+                { differentialData &&
+                <>
+                    <span className='title'>In/Out Differential</span>
+                    <Chart originalData={differentialData} type="differential" />
+                </>}
+
             </div>
         </div>
     );
