@@ -11,7 +11,10 @@ app.use(bodyParser.json());
 // allow cors only from localhost:3000 for local react app development
 app.use(cors({
   origin: function(origin, callback){
-    console.log('cors',origin)
+    if (origin) {
+      console.log('cors',origin)
+    }
+   
     // allow requests with no origin 
     // (like mobile apps or curl requests)
     if(!origin) return callback(null, true);
