@@ -2,13 +2,28 @@ import { MongoClient, ObjectId } from "mongodb";
 import 'dotenv/config';
 
 const mongoInfo = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.f1z2lxc.mongodb.net/?retryWrites=true&w=majority`;
-const client = new MongoClient(mongoInfo);
-client.connect()
+const client = new MongoClient(mongoInfo, {
+  serverSelectionTimeoutMS: 5000, // Fail fast if no network
+  connectTimeoutMS: 10000,
+});
+
+export async function connectDB() {
+  try {
+      await client.connect();
+      console.log("Connected successfully to MongoDB");
+  } catch (err) {
+      console.error("Failed to connect to MongoDB", err);
+      // We don't exit the process here so that the server can 
+      // potentially try to reconnect later or be restarted by systemd
+      throw err; 
+  }
+}
+
 const database = client.db('weather');
 const dataPoints = database.collection('data');
 const databaseDistance = client.db('distance');
 const distanceCollection = databaseDistance.collection('distance');
-console.log(isConnected())
+console.log('db is connected:', isConnected())
 const DistanceDocumentId = new ObjectId('664116e78fb5b2099b4ab2eb')
 
 function isConnected() {

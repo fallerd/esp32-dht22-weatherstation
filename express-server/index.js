@@ -1,4 +1,4 @@
-import { update, updateDistance, getData, getDistance } from './db.js'
+import { update, updateDistance, getData, getDistance, connectDB } from './db.js'
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -35,7 +35,10 @@ app.get('/data/', (req, res) => {
   getData(daysToShow).then(data => {
     console.log('Data loaded:', data.length > 0)
     res.json({ message: "Hello from Express!", data });
-  })
+  }).catch(err => {
+    console.error("DB Error:", err);
+    res.status(500).json({ error: "Database connection failed" });
+  });
 });
 app.get('/distance/', (req, res) => {
   console.log('distance request received', req.body);
@@ -43,7 +46,10 @@ app.get('/distance/', (req, res) => {
   getDistance().then(data => {
     console.log('Distance loaded:', data)
     res.json({ message: "Hello from Express!", data });
-  })
+  }).catch(err => {
+    console.error("DB Error:", err);
+    res.status(500).json({ error: "Database connection failed" });
+  });
 });
 
 app.post("/addData/", function (req, res) {
@@ -75,6 +81,19 @@ app.post("/postDistance/", function (req, res) {
   res.send("success");
 });
 
-app.listen(port, function () {
-  console.log(`App listening on port ${port}!`);
-});
+
+async function startServer() {
+  try {
+      console.log("Connecting to DB...");
+      await connectDB();
+      
+      app.listen(port, () => {
+          console.log(`App listening on port ${port}!`);
+      });
+  } catch (err) {
+      console.error("Server failed to start due to DB error. Exiting...");
+      process.exit(1); // Exit with failure so the OS restarts the service
+  }
+}
+
+startServer();
