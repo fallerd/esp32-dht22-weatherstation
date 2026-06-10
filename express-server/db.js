@@ -125,6 +125,67 @@ function generateSensorAggregatePipeline(sensor, daysToShow) {
             }
         ];
     }
+    // All-time mode: 2 points/day (low/high) using original event timestamps. commented as this is more compute intensive, but slightly more accurate for identifying trends in the data. leaving the code here in case i want to switch back in the future
+    // if (daysToShow === DateRangeDays.all) {
+    //     return [
+    //         {
+    //             $match: {
+    //                 sensor,
+    //             },
+    //         },
+    //         {
+    //             $group: {
+    //                 _id: {
+    //                     $dateTrunc: {
+    //                         date: "$date",
+    //                         unit: "day",
+    //                     },
+    //                 },
+    //                 low: {
+    //                     $top: {
+    //                         sortBy: { temp: 1, date: 1 },
+    //                         output: {
+    //                             temp: "$temp",
+    //                             humidity: "$humidity",
+    //                             date: "$date",
+    //                         },
+    //                     },
+    //                 },
+    //                 high: {
+    //                     $top: {
+    //                         sortBy: { temp: -1, date: -1 },
+    //                         output: {
+    //                             temp: "$temp",
+    //                             humidity: "$humidity",
+    //                             date: "$date",
+    //                         },
+    //                     },
+    //                 },
+    //             },
+    //         },
+    //         {
+    //             $project: {
+    //                 points: ["$low", "$high"],
+    //             },
+    //         },
+    //         {
+    //             $unwind: "$points",
+    //         },
+    //         {
+    //             $replaceRoot: {
+    //                 newRoot: {
+    //                     temp: { $trunc: ["$points.temp", 1] },
+    //                     humidity: { $trunc: ["$points.humidity", 1] },
+    //                     date: { $toLong: "$points.date" },
+    //                 },
+    //             },
+    //         },
+    //         {
+    //             $sort: { date: 1 },
+    //         },
+    //     ];
+    // }
+    
     const hourBinSize = daysToShow === DateRangeDays.all ? 4 : 1; // 4 hour bins for all time, 1 hour bins for anything else
     const hourBinMidpoint = hourBinSize * 60 / 2; // in minutes, used to adjust the timestamp to the middle of the bin
 
