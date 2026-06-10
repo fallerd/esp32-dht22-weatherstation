@@ -13,7 +13,17 @@ function App() {
   const [distanceLoading, setDistanceLoading] = useState(true);
   const [distanceError, setDistanceError] = useState('');
   const [loadingData, setLoadingData] = useState(true);
-  const [days, setDays] = useState(DateRangeMap[DateRanges.days3]);
+  const [days, setDaysState] = useState<number>(() => {
+    const stored = localStorage.getItem('days');
+    const parsed = stored !== null ? parseFloat(stored) : NaN;
+    const validValues = Object.values(DateRangeMap) as number[];
+    return validValues.includes(parsed) ? parsed : DateRangeMap[DateRanges.days1];
+  });
+
+  const setDays = (value: number) => {
+    localStorage.setItem('days', String(value));
+    setDaysState(value);
+  };
   const API_BASE_URL = ''; // set to http://192.168.0.69:3000 when in development, '' for prod build
 
   const loadDistance = () => {
