@@ -26,6 +26,35 @@ const distanceCollection = databaseDistance.collection('distance');
 console.log('db is connected:', isConnected())
 const DistanceDocumentId = new ObjectId('664116e78fb5b2099b4ab2eb')
 
+const DateRangeDays = Object.freeze({
+  hours12: 0.5,
+  days1: 1,
+  days3: 3,
+  days7: 7,
+  days30: 30,
+  all: -1,
+  default: 3,
+});
+
+const allowedDaysToShow = new Set([
+  DateRangeDays.hours12,
+  DateRangeDays.days1,
+  DateRangeDays.days3,
+  DateRangeDays.days7,
+  DateRangeDays.days30,
+  DateRangeDays.all,
+]);
+
+function normalizeDaysToShow(daysToShow) {
+  const parsed = Number(daysToShow);
+  if (allowedDaysToShow.has(parsed)) {
+    return parsed;
+  }
+
+  console.warn('Invalid daysToShow received, defaulting to 3:', daysToShow);
+  return DateRangeDays.default;
+}
+
 function isConnected() {
     return !!client && !!client.topology && client.topology.isConnected()
 }
@@ -74,7 +103,8 @@ function generateSensorAggregatePipeline(sensor, daysToShow) {
     const dateLimit = daysToShow > 0 ? new Date(Date.now() - daysToShow * 24 * 60 * 60 * 1000) : null;
 
     // Raw data passthrough for last 12/24 hours
-    if (parseInt(daysToShow) <= 1) {
+    // > 0 because -1 means "all time"
+    if (daysToShow > 0 && daysToShow <= DateRangeDays.days1) {
         return [
             {
                 '$match': {
@@ -160,10 +190,10 @@ export async function getData(daysToShow) {
     console.log('getdata api called')
     const start = new Date().getTime()
     const data = [];
-
+    const safeDaysToShow = normalizeDaysToShow(daysToShow);
     if (isConnected()) {
 
-        let [sensor1Data, sensor2Data, sensor3Data, sensor4Data] = await Promise.all([getSensorData('1', daysToShow), getSensorData('2', daysToShow), getSensorData('3', daysToShow), getSensorData('4', daysToShow)]);
+    let [sensor1Data, sensor2Data, sensor3Data, sensor4Data] = await Promise.all([getSensorData('1', safeDaysToShow), getSensorData('2', safeDaysToShow), getSensorData('3', safeDaysToShow), getSensorData('4', safeDaysToShow)]);
 
         data.push(...[{
             sensor: '1',
