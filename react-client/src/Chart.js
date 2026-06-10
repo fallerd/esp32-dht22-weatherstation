@@ -105,6 +105,30 @@ function Chart({ originalData, type }) {
         .attr("fill", "white")
         .attr("x", 0)
         .attr("y", 80); // position at the top of legend
+
+      function interpolateAtX(value, xValue, metric) {
+        if (!value || value.length === 0) return null;
+
+        const dates = value.map(d => d.date);
+        const i = d3.bisectLeft(dates, xValue);
+        const left = value[i - 1];
+        const right = value[i];
+
+        // If hover is outside the series range, use nearest endpoint.
+        if (!left && right) return right[metric];
+        if (left && !right) return left[metric];
+        if (!left || !right) return null;
+
+        const span = right.date - left.date;
+        if (span === 0) return left[metric];
+
+        const t = (xValue - left.date) / span;
+        const leftValue = left[metric];
+        const rightValue = right[metric];
+
+        if (leftValue == null || rightValue == null) return null;
+        return leftValue + (rightValue - leftValue) * t;
+      }
     
       function updateHover(xValue) {
         const mouseX = x(xValue);
@@ -113,16 +137,13 @@ function Chart({ originalData, type }) {
         hoverText.attr("opacity", 1);
     
         dataNest.forEach(({ key, value }) => {
-          // Find the data point that's closest to the x position.
-          const i = d3.bisectLeft(value.map(d => d.date), xValue);
-          const d0 = value[i - 1];
-          const d1 = value[i];
-          if (d0 && d1) {
-            const d = xValue - d0.date > d1.date - xValue ? d1 : d0;
-            legends[key].text(`${key}: ${d[type]}`);
-          } else {
+          const interpolated = interpolateAtX(value, xValue, type);
+          if (interpolated == null) {
             legends[key].text(`${key}`);
+            return;
           }
+
+          legends[key].text(`${key}: ${interpolated.toFixed(1)}`);
         });
     
         const date = new Date(xValue);
