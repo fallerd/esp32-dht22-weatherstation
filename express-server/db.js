@@ -119,57 +119,42 @@ function generateSensorAggregatePipeline(sensor, daysToShow) {
     }
 
     return [
-        {
-            '$match': {
-                'sensor': sensor,
-                ...(dateLimit && { 'date': { '$gte': dateLimit } })
-            }
-        }, {
-          '$group': {
-            '_id': {
-              '$dateToString': {
-                'format': '%Y-%m-%dT%H', 
-                'date': '$date'
-              }
-            }, 
-            'temp': {
-              '$avg': '$temp'
-            }, 
-            'humidity': {
-              '$avg': '$humidity'
-            }, 
-            'count': {
-              '$sum': 1
-            }
-          }
-        }, {
-          '$sort': {
-            '_id': 1
-          }
-        }, {
-          '$project': {
-              'humidity': { '$trunc': [ "$humidity", 1 ] },
-              'temp': { '$trunc': [ "$temp", 1 ] }
-          }
-        }, {
-          '$addFields': {
-            'date': {
-              '$dateAdd': {
-                'startDate': {
-                  '$dateFromString': {
-                    'dateString': '$_id'
-                  }
-                }, 
-                'unit': 'minute', 
-                'amount': 30
-              }
-            }
-          }
-        }, {
-          '$unset': [
-            'count', '_id'
-          ]
-        }
+      {
+        $match: {
+          sensor,
+          ...(dateLimit && { date: { $gte: dateLimit } }),
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateTrunc: {
+              date: "$date",
+              unit: "hour",
+            },
+          },
+          temp: { $avg: "$temp" },
+          humidity: { $avg: "$humidity" },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+      {
+        $project: {
+          temp: { $trunc: ["$temp", 1] },
+          humidity: { $trunc: ["$humidity", 1] },
+          date: {
+            $toLong: {
+              $dateAdd: {
+                startDate: "$_id",
+                unit: "minute",
+                amount: 30, // keep your midpoint behavior
+              },
+            },
+          },
+        },
+      },
     ];
 }
 
@@ -180,8 +165,11 @@ async function getSensorData(sensor, daysToShow) {
     
     const data = []
     for await (const doc of aggCursor) {
-        doc.date = new Date(doc.date).getTime()
-        data.push(doc)
+        if (doc.date instanceof Date) {
+            console.warn('Unexpected Date object in doc.date, converting to timestamp:', doc.date);
+            doc.date = doc.date.getTime();
+        }
+        data.push(doc);
     }
     return data
 }
