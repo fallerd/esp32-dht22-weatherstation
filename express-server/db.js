@@ -117,7 +117,8 @@ function generateSensorAggregatePipeline(sensor, daysToShow) {
             }
         ];
     }
-    const hourBinSize = daysToShow === DateRangeDays.all ? 4 : 1;
+    const hourBinSize = daysToShow === DateRangeDays.all ? 4 : 1; // 4 hour bins for all time, 1 hour bins for anything else
+    const hourBinMidpoint = hourBinSize * 60 / 2; // in minutes, used to adjust the timestamp to the middle of the bin
 
     return [
       {
@@ -151,7 +152,7 @@ function generateSensorAggregatePipeline(sensor, daysToShow) {
                     $dateAdd: {
                         startDate: "$_id",
                         unit: "minute",
-                        amount: hourBinSize * 60 / 2 // midpoint of bucket time
+                        amount: hourBinMidpoint
                     }
                 }
             }
