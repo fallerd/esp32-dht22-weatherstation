@@ -114,6 +114,14 @@ function generateSensorAggregatePipeline(sensor, daysToShow) {
             },
             {
                 '$sort': { 'date': 1 }
+            },
+            {
+                '$project': {
+                    '_id': 0,
+                    'temp': 1,
+                    'humidity': 1,
+                    'date': { '$toLong': '$date' }
+                }
             }
         ];
     }
