@@ -117,6 +117,7 @@ function generateSensorAggregatePipeline(sensor, daysToShow) {
             }
         ];
     }
+    const hourBinSize = daysToShow === DateRangeDays.all ? 4 : 1;
 
     return [
       {
@@ -131,6 +132,7 @@ function generateSensorAggregatePipeline(sensor, daysToShow) {
             $dateTrunc: {
               date: "$date",
               unit: "hour",
+              binSize: hourBinSize,
             },
           },
           temp: { $avg: "$temp" },
@@ -142,17 +144,17 @@ function generateSensorAggregatePipeline(sensor, daysToShow) {
       },
       {
         $project: {
-          temp: { $trunc: ["$temp", 1] },
-          humidity: { $trunc: ["$humidity", 1] },
-          date: {
-            $toLong: {
-              $dateAdd: {
-                startDate: "$_id",
-                unit: "minute",
-                amount: 30, // keep your midpoint behavior
-              },
-            },
-          },
+            temp: { $trunc: ["$temp", 1] },
+            humidity: { $trunc: ["$humidity", 1] },
+            date: {
+                $toLong: {
+                    $dateAdd: {
+                        startDate: "$_id",
+                        unit: "minute",
+                        amount: hourBinSize * 60 / 2 // midpoint of bucket time
+                    }
+                }
+            }
         },
       },
     ];
