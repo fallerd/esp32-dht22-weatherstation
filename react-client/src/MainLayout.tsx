@@ -59,6 +59,11 @@ type DataPoint = {
 
 type EnabledSensors = { [key: string]: Boolean }
 
+const getLastDataPoint = (data?: DataPoint[]): DataPoint | null => {
+    if (!data || data.length === 0) return null;
+    return data[data.length - 1] ?? null;
+}
+
 function computeDerivative(data: DataPoint[]): DataPoint[] {
     const derived: DataPoint[] = [];
     const clamp = (value: number, min: number, max: number): number =>
@@ -175,10 +180,10 @@ function MainLayout({ rawData, days, setDays, loading, refreshData }: MainLayout
     const differential = (() => {
         const outsideTempData = filteredData.find((sensor) => sensor.sensor === NamesToSensors.Outside)?.data
         const insideTempData = filteredData.find((sensor) => sensor.sensor === NamesToSensors.Office)?.data
-        if (!outsideTempData || !insideTempData) return null;
-        const outsideTemp = outsideTempData[outsideTempData.length-1].temp;
-        const insideTemp = insideTempData[insideTempData.length-1].temp;
-        return outsideTemp - insideTemp;
+        const outsideLastPoint = getLastDataPoint(outsideTempData);
+        const insideLastPoint = getLastDataPoint(insideTempData);
+        if (!outsideLastPoint || !insideLastPoint) return null;
+        return outsideLastPoint.temp - insideLastPoint.temp;
     })();
 
     const diffColor = differential !== null ? getTemperatureColor(differential) : '#ccc';
@@ -187,17 +192,19 @@ function MainLayout({ rawData, days, setDays, loading, refreshData }: MainLayout
         try {
             const outsideTempData = filteredData.find((sensor) => sensor.sensor === NamesToSensors.Outside)?.data
             const insideTempData = filteredData.find((sensor) => sensor.sensor === NamesToSensors.Office)?.data
-            if (!outsideTempData || !insideTempData) return null;
+            if (!outsideTempData || !insideTempData || outsideTempData.length === 0 || insideTempData.length === 0) return null;
             const diffData: any[] = [];
-            for (let i=0; i<outsideTempData.length; i++) {
+            const count = Math.min(outsideTempData.length, insideTempData.length);
+            for (let i = 0; i < count; i++) {
                 const outData = outsideTempData[i];
                 const inData = insideTempData[i];
                 if (!outData || !inData) continue;
                 diffData.push({
-                    "differential": parseFloat((outData.temp - insideTempData[i].temp).toFixed(1)),
+                    "differential": parseFloat((outData.temp - inData.temp).toFixed(1)),
                     "date": outData.date
                 })
             }
+            if (diffData.length === 0) return null;
             const formattedData= [
                 {
                 "sensor": "1",
