@@ -3,7 +3,7 @@
 #include "DHTesp.h"
 #include "secret.h"
 
-const char* ssid = SSID;
+const char* ssid = WIFI_SSID;
 const char* password = PASSWORD;
 
 DHTesp dht;
@@ -16,10 +16,21 @@ static void InitWifi() {
   } else {
     Serial.println("Connecting Wifi...");
     timeout = 0;
+
+    // Debug to show wifi networks
+    Serial.println("Scanning...");
+    int n = WiFi.scanNetworks();
+    for (int i = 0; i < n; i++) {
+        Serial.printf("%s (%d dBm)\n",
+            WiFi.SSID(i).c_str(),
+            WiFi.RSSI(i));
+    }
+
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
       delay(1000);
-      Serial.print(".");
+      Serial.print("wifi status=");
+      Serial.println(WiFi.status());
       timeout++;
       if (timeout > 60){ 
         Serial.println("Connection timed out, resetting board"); 
